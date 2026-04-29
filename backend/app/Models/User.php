@@ -2,31 +2,60 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Str;
 
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable
+
+class User extends Model
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, SoftDeletes, HasFactory;
+    protected $fillable = [
+        'id',
+        'name',
+        'email',
+        'password',
+        'role',
+        'is_blocked',
+        'profile_picture',
+        'phone'
+    ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    protected $hidden = [
+        'password',
+        'remember_token'
+    ];
+
+    protected $casts = [
+        'is_blocked' => 'boolean',
+        'role' => 'string'
+    ];
+
+    protected static function boot()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (!$model->id) {
+                $model->id = (string) Str::uuid();
+            }
+        });
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isTeacher()
+    {
+        return $this->role === 'teacher';
+    }
+
+    public function isBlocked()
+    {
+        return $this->is_blocked === true;
     }
 }
