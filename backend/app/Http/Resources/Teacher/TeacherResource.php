@@ -1,10 +1,15 @@
 <?php
 
-namespace App\Http\Ressources\Teacher;
+namespace App\Http\Resources\Teacher;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * Formate la réponse JSON d'un enseignant.
+ * Champ photo : profile_picture (conforme au modèle User du projet)
+ * Champs exclus : password, remember_token
+ */
 class TeacherResource extends JsonResource
 {
     public function toArray(Request $request): array
