@@ -3,7 +3,7 @@
 use App\Http\Controllers\TeacherController;
 use Illuminate\Support\Facades\Route;
 
-/*
+/*adamou 
 |--------------------------------------------------------------------------
 | API Routes — GMP
 |--------------------------------------------------------------------------
