@@ -21,7 +21,7 @@ if (isset($_POST['login'])) {
 <head>
     <meta charset="UTF-8">
     <title>Connexion Enseignant</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../CSS/style.css">
 </head>
 <body>
 <h2>Connexion Enseignant</h2>

@@ -18,6 +18,7 @@ if (!isset($_SESSION['admin'])) {
     <a href="teachers-list.php">Liste des enseignants</a>
     <a href="add-teacher.php">Ajouter enseignant</a>
     <a href="profile-admin.php">Profil Admin</a>
+    <a href="reservations.php">Gérer réservations</a>
     <a href="logout.php">Déconnexion</a>
 </nav>
 <div class="container">
