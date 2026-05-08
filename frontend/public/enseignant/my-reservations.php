@@ -22,14 +22,14 @@ $email = $_SESSION['teacher_email'];
 <head>
 <meta charset="UTF-8">
 <title>Mes réservations</title>
-<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
 
 <nav>
-    <a href="dashboard.php">Dashboard</a>
+    <a href="dashboard-enseignant.php">Dashboard</a>
     <a href="reservations.php">Nouvelle réservation</a>
-    <a href="../auth/logout.php">Déconnexion</a>
+    <a href="../login/logout.php">Déconnexion</a>
 </nav>
 
 <h2>Mes réservations</h2>
@@ -49,9 +49,9 @@ $email = $_SESSION['teacher_email'];
 
 <tr>
 
-<td><?= $r['title'] ?></td>
-<td><?= $r['date'] ?></td>
-<td><?= $r['message'] ?></td>
+<td><?= htmlspecialchars($r['title']) ?></td>
+<td><?= htmlspecialchars($r['date']) ?></td>
+<td><?= htmlspecialchars($r['message']) ?></td>
 
 <td>
 

@@ -40,7 +40,7 @@ if (isset($_POST['save'])) {
 <head>
     <meta charset="UTF-8">
     <title>Ajouter un enseignant</title>
-    <link rel="stylesheet" href="CSS/style.css">
+    <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
 <h2>Ajouter un enseignant</h2>

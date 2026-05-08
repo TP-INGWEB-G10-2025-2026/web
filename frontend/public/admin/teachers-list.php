@@ -18,7 +18,7 @@ if (file_exists($file)) {
 <head>
     <meta charset="UTF-8">
     <title>Liste des enseignants</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
 <h2>Liste des enseignants</h2>
@@ -32,9 +32,9 @@ if (file_exists($file)) {
 </tr>
 <?php foreach ($teachers as $teacher): ?>
 <tr>
-    <td><?php echo $teacher['name']; ?></td>
-    <td><?php echo $teacher['email']; ?></td>
-    <td><?php echo $teacher['phone']; ?></td>
+    <td><?php echo htmlspecialchars($teacher['name']); ?></td>
+    <td><?php echo htmlspecialchars($teacher['email']); ?></td>
+    <td><?php echo htmlspecialchars($teacher['phone']); ?></td>
     <td>
         <a href="edit-teacher.php?id=<?php echo $teacher['id']; ?>">Modifier</a>
     </td>
