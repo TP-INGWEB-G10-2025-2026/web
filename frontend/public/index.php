@@ -8,7 +8,7 @@ if (isset($_POST['login'])) {
     if ($email == "admin@gmail.com" && $password == "admin123") {
         $_SESSION['admin'] = "Administrateur";
         $_SESSION['role'] = "admin";
-        header("Location: dashboard-admin.php");
+        header("Location: admin/dashboard-admin.php");
         exit;
     } else {
         $error = "Identifiants incorrects";
@@ -21,7 +21,7 @@ if (isset($_POST['login'])) {
 <head>
     <meta charset="UTF-8">
     <title>Connexion Admin</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <h2>Connexion Admin</h2>

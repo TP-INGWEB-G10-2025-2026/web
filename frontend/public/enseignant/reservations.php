@@ -2,7 +2,7 @@
 session_start();
 
 if (!isset($_SESSION['teacher'])) {
-    header("Location: ../auth/login-teacher.php");
+    header("Location: ../login/login-enseignant.php");
     exit;
 }
 
@@ -41,14 +41,14 @@ if (isset($_POST['save'])) {
 <head>
 <meta charset="UTF-8">
 <title>Nouvelle réservation</title>
-<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
 
 <nav>
-    <a href="dashboard.php">Dashboard</a>
+    <a href="dashboard-enseignant.php">Dashboard</a>
     <a href="my-reservations.php">Mes réservations</a>
-    <a href="../auth/logout.php">Déconnexion</a>
+    <a href="../login/logout.php">Déconnexion</a>
 </nav>
 
 <h2>Faire une réservation</h2>
