@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Role;
+use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
