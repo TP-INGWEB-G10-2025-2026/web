@@ -2,88 +2,31 @@
 
 namespace App\Models;
 
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Support\Str;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-
-class User extends Model
+#[Fillable(['name', 'email', 'password'])]
+#[Hidden(['password', 'remember_token'])]
+class User extends Authenticatable
 {
-    use HasApiTokens, SoftDeletes, HasFactory;
-    protected $fillable = [
-        'id',
-        'name',
-        'email',
-        'password',
-        'role',
-        'is_blocked',
-        'profile_picture',
-        'phone'
-    ];
+    /** @use HasFactory<UserFactory> */
+    use HasFactory, Notifiable;
 
-    protected $hidden = [
-        'password',
-        'remember_token'
-    ];
-
-    protected $casts = [
-        'is_blocked' => 'boolean',
-        'role' => 'string'
-    ];
-
-    protected static function boot()
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
     {
-        parent::boot();
-
-        static::creating(function ($model) {
-            if (!$model->id) {
-                $model->id = (string) Str::uuid();
-            }
-        });
-    }
-
-    public function isAdmin()
-    {
-        return $this->role === 'admin';
-    }
-
-    public function isTeacher()
-    {
-        return $this->role === 'teacher';
-    }
-
-    public function isBlocked()
-    {
-        return $this->is_blocked === true;
-    }
-
-    // UUID auto-généré à la création
-    protected static function boot()
-    {
-        parent::boot();
-        static::creating(function ($model) {
-            if (! $model->id) {
-                $model->id = (string) Str::uuid();
-            }
-        });
-    }
-
-    // ─── Helpers de rôle ─────────────────────────────────────────
-
-    public function isAdmin(): bool
-    {
-        return $this->role === 'admin';
-    }
-
-    public function isTeacher(): bool
-    {
-        return $this->role === 'teacher';
-    }
-
-    public function isBlocked(): bool
-    {
-        return $this->is_blocked === true;
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
     }
 }

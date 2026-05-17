@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard API</title>
+<script src="../js/app.js"></script>
+
+<style>
+body {
+  font-family: Arial;
+  background: #f4f4f4;
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+}
+
+
+</style>
+</head>
+
+<body>
+
+<h1>Dashboard API</h1>
+
+<div class="card" id="statusBox">Chargement...</div>
+
+
+
+<script >
+  async function loadStatus() {
+  const res = await fetch(CONFIG.APP_URL+'/api/v1/status');
+  const data = await res.json();
+
+  const box = document.getElementById('statusBox');
+
+  box.innerHTML = `
+    API: ${data.api_status} <br>
+    PHP: ${data.php_version} <br>
+    LARAVEL: ${data.laravel_version} <br>
+    MYSQL_STATUS: ${data.database_status} <br>
+    MySQL: ${data.mysql_version} <br>
+    Time: ${data.server_time}
+  `;
+}
+
+
+
+loadStatus();
+
+</script>
+
+</body>
+</html>
