@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use App\Enums\Role;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -13,7 +14,7 @@ return new class extends Migration
             $table->string('name', 255);
             $table->string('email')->unique();
             $table->string('password');
-            $table->enum('role', ['admin', 'teacher']);
+            $table->enum('role', [Role::Admin, Role::Teacher]);
             $table->boolean('is_blocked')->default(false);
             $table->string('phone')->nullable();
             $table->timestamps();

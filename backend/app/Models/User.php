@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Enums\Role;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Sanctum\HasApiTokens;
@@ -30,7 +31,7 @@ class User extends Model
 
     protected $casts = [
         'is_blocked' => 'boolean',
-        'role' => 'string'
+        'role' => Role::class,
     ];
 
     protected static function boot()
@@ -46,12 +47,12 @@ class User extends Model
 
     public function isAdmin()
     {
-        return $this->role === 'admin';
+        return $this->role === Role::Admin;
     }
 
     public function isTeacher()
     {
-        return $this->role === 'teacher';
+        return $this->role === Role::Teacher;
     }
 
     public function isBlocked()
