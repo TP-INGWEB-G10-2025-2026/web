@@ -3,6 +3,7 @@
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\CategoryController; // ← Ajouté
 
 
 Route::get("/status", function (): JsonResponse {
@@ -25,4 +26,29 @@ Route::get("/status", function (): JsonResponse {
         'mysql_version' => $mysqlVersion,
         'server_time' => now()->toDateTimeString(),
     ], 200);
+});
+
+
+// ─── Routes protégées ──────────────────────────────────────────────────────────
+Route::middleware(['auth:sanctum', 'check.blocked', 'is.admin'])->group(function () {
+
+    // ── Catégories ─────────────────────────────────────────────────────────────
+    Route::prefix('categories')->group(function () {
+
+        // GET    /api/v1/categories
+        Route::get('/',        [CategoryController::class, 'index']);
+
+        // GET    /api/v1/categories/{id}
+        Route::get('/{id}',    [CategoryController::class, 'show']);
+
+        // POST   /api/v1/categories
+        Route::post('/',       [CategoryController::class, 'store']);
+
+        // PUT    /api/v1/categories/{id}
+        Route::put('/{id}',    [CategoryController::class, 'update']);
+
+        // DELETE /api/v1/categories/{id}
+        Route::delete('/{id}', [CategoryController::class, 'destroy']);
+    });
+
 });
