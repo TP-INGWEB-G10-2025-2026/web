@@ -9,7 +9,6 @@ use Illuminate\Foundation\Configuration\Middleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web:      __DIR__ . '/../routes/web.php',
         api:      __DIR__ . '/../routes/api.php',    // ← Routes API activées
         apiPrefix: 'api',
         commands: __DIR__ . '/../routes/console.php',
@@ -39,11 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
         | Sanctum gère l'authentification via Bearer token
         |--------------------------------------------------------------
         */
-        $middleware->statefulApi();
-        web: __DIR__.'/../routes/api.php',
-        apiPrefix: 'api',
-        commands: __DIR__.'/../routes/console.php',
-        health: '/up',
+        $middleware->statefulApi();}
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();             // ← Sanctum stateless
