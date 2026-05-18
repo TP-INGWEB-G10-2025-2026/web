@@ -132,6 +132,7 @@ function saveProfile() {
     // sauvegarder
     saveTeachers();
 
+
     // mettre à jour session
     localStorage.setItem("user", JSON.stringify({
         role: "teacher",
@@ -148,3 +149,6 @@ function logout() {
 
     window.location.href = "login.html";
 }
+
+
+
