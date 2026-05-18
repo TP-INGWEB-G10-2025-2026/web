@@ -2,156 +2,113 @@
 
 namespace App\Services;
 
+use App\Enums\Role;
+use App\Mail\WelcomeTeacherMail;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\ValidationException;
 
 class TeacherService
 {
-    // ─────────────────────────────────────────────────────────────
-    // Lister les enseignants
-    // Filtres : ?name= &email= &is_blocked=true|false
-    // ─────────────────────────────────────────────────────────────
 
-    public function list(array $filters = []): LengthAwarePaginator
+
+    public function list(array $filters): LengthAwarePaginator
     {
         return User::query()
-            ->where('role', 'teacher')
-            ->when(
-                $filters['name'] ?? null,
-                fn ($q, $v) => $q->where('name', 'like', "%{$v}%")
-            )
-            ->when(
-                $filters['email'] ?? null,
-                fn ($q, $v) => $q->where('email', 'like', "%{$v}%")
-            )
-            ->when(
-                array_key_exists('is_blocked', $filters),
-                fn ($q) => $q->where(
-                    'is_blocked',
-                    filter_var($filters['is_blocked'], FILTER_VALIDATE_BOOLEAN)
-                )
-            )
-            ->orderBy('created_at', 'desc')
+            ->where('role', Role::Teacher)
+            ->when($filters['name']       ?? null, fn($q, $v) => $q->where('name',  'like', "%{$v}%"))
+            ->when($filters['email']      ?? null, fn($q, $v) => $q->where('email', 'like', "%{$v}%"))
+            ->when(isset($filters['is_blocked']), fn($q) => $q->where('is_blocked', filter_var($filters['is_blocked'], FILTER_VALIDATE_BOOLEAN)))
+            ->latest()
             ->paginate(15);
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // Trouver un enseignant — 404 automatique si introuvable
-    // ─────────────────────────────────────────────────────────────
-
-    public function find(string $id): User
+    public function findOrFail(string $id): User
     {
-        return User::where('role', 'teacher')->findOrFail($id);
+        return User::findOrFail($id);
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // Créer un enseignant
-    // Hash::make explicite (le modèle n'a pas le cast 'hashed')
-    // ─────────────────────────────────────────────────────────────
 
     public function create(array $data): User
     {
-        $plainPassword = $data['password'];
+        $plain = $data['password'];
 
         $teacher = User::create([
-            'name'       => $data['name'],
-            'email'      => $data['email'],
-            'password'   => Hash::make($plainPassword),  // Hash explicite
-            'phone'      => $data['phone'] ?? null,
-            'role'       => 'teacher',
-            'is_blocked' => false,
+            'name'     => $data['name'],
+            'email'    => $data['email'],
+            'password' => Hash::make($plain),
+            'phone'    => $data['phone'] ?? null,
+            'role'     => Role::Teacher,
         ]);
 
-        $this->sendWelcomeEmail($teacher, $plainPassword);
+        // Send welcome email via SendGrid
+        // Mail::to($teacher->email)->queue(new WelcomeTeacherMail($teacher, $plain));
+
+        // Send welcome SMS via Twilio (only if phone provided)
+        // if ($teacher->phone) {
+        //     $this->twilioService->sendSms(
+        //         to     : $teacher->phone,
+        //         message: "Bienvenue {$teacher->name} ! Votre compte a été créé. Email: {$teacher->email} | Mot de passe: {$plain}",
+        //     );
+        // }
 
         return $teacher;
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // Modifier un enseignant
-    // ─────────────────────────────────────────────────────────────
-
     public function update(User $teacher, array $data): User
     {
-        // Hash explicite si le mot de passe est fourni
         if (isset($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         }
 
-        $teacher->update($data);
+        $teacher->update(array_filter($data, fn($v) => $v !== null));
 
         return $teacher->fresh();
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // Supprimer — Soft Delete (deleted_at renseigné)
-    // ─────────────────────────────────────────────────────────────
 
     public function delete(User $teacher): void
     {
-        $this->guardAdmin($teacher, 'supprimer');
+        $this->guardAdmin($teacher);
         $teacher->delete();
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // Bloquer — is_blocked = true + révocation tokens
-    // ─────────────────────────────────────────────────────────────
-
     public function block(User $teacher): User
     {
-        $this->guardAdmin($teacher, 'bloquer');
-
+        $this->guardAdmin($teacher);
         $teacher->update(['is_blocked' => true]);
-        $teacher->tokens()->delete();  // Déconnexion forcée
+
+        // if ($teacher->phone) {
+        //     $this->twilioService->sendSms(
+        //         to     : $teacher->phone,
+        //         message: "Votre compte a été bloqué. Contactez un administrateur.",
+        //     );
+        // }
 
         return $teacher->fresh();
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // Débloquer — is_blocked = false
-    // ─────────────────────────────────────────────────────────────
 
     public function unblock(User $teacher): User
     {
-        $this->guardAdmin($teacher, 'débloquer');
-
+        $this->guardAdmin($teacher);
         $teacher->update(['is_blocked' => false]);
+
+        // if ($teacher->phone) {
+        //     $this->twilioService->sendSms(
+        //         to     : $teacher->phone,
+        //         message: "Votre compte a été débloqué. Vous pouvez vous connecter.",
+        //     );
+        // }
 
         return $teacher->fresh();
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // Helpers privés
-    // ─────────────────────────────────────────────────────────────
-
-    private function guardAdmin(User $user, string $action): void
+    private function guardAdmin(User $user): void
     {
         if ($user->isAdmin()) {
-            abort(403, "Impossible de {$action} un compte administrateur.");
-        }
-    }
-
-    private function sendWelcomeEmail(User $teacher, string $plainPassword): void
-    {
-        try {
-            Mail::raw(
-                "Bonjour {$teacher->name},\n\n"
-                . "Votre compte enseignant a été créé sur la plateforme GMP\n"
-                . "(Gestion du Matériel Pédagogique — Université de Ngaoundéré).\n\n"
-                . "Vos identifiants :\n"
-                . "  Email        : {$teacher->email}\n"
-                . "  Mot de passe : {$plainPassword}\n\n"
-                . "⚠️  Changez votre mot de passe dès votre première connexion.\n\n"
-                . "Cordialement,\nL'administration — Département MI",
-                fn ($m) => $m
-                    ->to($teacher->email)
-                    ->subject('[GMP] Création de votre compte enseignant')
-            );
-        } catch (\Throwable $e) {
-            Log::error("Email bienvenue [{$teacher->email}] : " . $e->getMessage());
+            throw ValidationException::withMessages([
+                'role' => ['Impossible d\'effectuer cette action sur un compte administrateur.'],
+            ]);
         }
     }
 }

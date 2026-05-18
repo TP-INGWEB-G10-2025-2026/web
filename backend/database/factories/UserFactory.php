@@ -1,31 +1,33 @@
 <?php
+// database/factories/UserFactory.php
 
 namespace Database\Factories;
 
-use App\Models\Model;
+use App\Enums\Role;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
-/**
- * @extends Factory<User>
- */
 class UserFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'password' => Hash::make('password'),
-            'is_blocked'            => false,
-            'role' => 'teacher',
-            'phone' => fake()->phoneNumber(),
+            'name'       => fake()->name(),
+            'email'      => fake()->unique()->safeEmail(),
+            'password'   => bcrypt('password'),
+            'role'       => Role::Teacher,
+            'is_blocked' => false,
+            'phone'      => fake()->phoneNumber(),
         ];
+    }
+
+    public function admin(): static
+    {
+        return $this->state(fn () => ['role' => Role::Admin]);
+    }
+
+    public function blocked(): static
+    {
+        return $this->state(fn () => ['is_blocked' => true]);
     }
 }

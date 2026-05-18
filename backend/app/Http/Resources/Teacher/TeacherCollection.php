@@ -1,5 +1,6 @@
 <?php
 
+
 namespace App\Http\Resources\Teacher;
 
 use Illuminate\Http\Request;
@@ -12,14 +13,12 @@ class TeacherCollection extends ResourceCollection
     public function toArray(Request $request): array
     {
         return [
-            'data'  => $this->collection,
-            'meta'  => [
+            'data' => $this->collection,
+            'meta' => [
                 'current_page' => $this->currentPage(),
-                'last_page'    => $this->lastPage(),
                 'per_page'     => $this->perPage(),
                 'total'        => $this->total(),
-                'from'         => $this->firstItem(),
-                'to'           => $this->lastItem(),
+                'last_page'    => $this->lastPage(),
             ],
             'links' => [
                 'first' => $this->url(1),
