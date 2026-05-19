@@ -13,6 +13,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
+    use HasApiTokens, SoftDeletes, HasFactory;
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasUuids;
 
 
@@ -34,6 +35,24 @@ class User extends Authenticatable
     ];
 
     protected $casts = [
+        'is_blocked' => 'boolean',
+        'role'       => 'string'
+    ];
+
+    // UUID auto-généré à la création
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (! $model->id) {
+                $model->id = (string) Str::uuid();
+            }
+        });
+    }
+
+    // ─── Helpers de rôle ─────────────────────────────────────────
+
         'is_blocked'        => 'boolean',
         'role'              => Role::class,
         'email_verified_at' => 'datetime',
