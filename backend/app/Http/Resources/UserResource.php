@@ -1,12 +1,12 @@
 <?php
 
 
-namespace App\Http\Resources\Teacher;
+namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class TeacherResource extends JsonResource
+class UserResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
@@ -17,7 +17,6 @@ class TeacherResource extends JsonResource
             'phone'      => $this->phone,
             'role'       => $this->role->value,
             'is_blocked' => $this->is_blocked,
-            'avatar'     => $this->avatar ? asset('storage/' . $this->avatar) : null,
             'created_at' => $this->created_at?->toISOString(),
         ];
     }

@@ -15,12 +15,17 @@ class CategorySeeder extends Seeder
             'Capteurs & Arduino',
             'Marqueurs & Tableau',
             'Matériels de TP',
+            'Informatique',
+            'Audiovisuel',
+            'Mobilier',
+            'Réseau & Télécom',
+            'Bureautique',
         ];
 
         foreach ($categories as $name) {
             Category::firstOrCreate(['name' => $name]);
         }
 
-        $this->command->info('✅ 5 catégories créées.');
+        $this->command->info(' 5 catégories créées.');
     }
 }

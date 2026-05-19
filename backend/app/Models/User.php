@@ -1,32 +1,37 @@
 <?php
 
+
 namespace App\Models;
 
+use App\Enums\Role;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Support\Str;
 
-
-class User extends Model
+class User extends Authenticatable
 {
     use HasApiTokens, SoftDeletes, HasFactory;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasUuids;
+
+
+    protected $keyType = 'string';
+    public $incrementing = false;
 
     protected $fillable = [
-        'id',
         'name',
         'email',
         'password',
         'role',
         'is_blocked',
-        'profile_picture',
-        'phone'
+        'phone',
     ];
 
     protected $hidden = [
         'password',
-        'remember_token'
+        'remember_token',
     ];
 
     protected $casts = [
@@ -48,14 +53,20 @@ class User extends Model
 
     // ─── Helpers de rôle ─────────────────────────────────────────
 
+        'is_blocked'        => 'boolean',
+        'role'              => Role::class,
+        'email_verified_at' => 'datetime',
+        'password'          => 'hashed',
+    ];
+
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->role === Role::Admin;
     }
 
     public function isTeacher(): bool
     {
-        return $this->role === 'teacher';
+        return $this->role === Role::Teacher;
     }
 
     public function isBlocked(): bool
