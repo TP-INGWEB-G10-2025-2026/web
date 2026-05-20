@@ -8,12 +8,14 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     public function up(): void
-    {
+     {
         Schema::create('categories', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->string('name', 255)->unique();
-            $table->timestamps();
-        });
+             $table->uuid('id')->primary();
+             $table->string('name')->unique();
+             $table->text('description')->nullable();
+             $table->timestamps();
+             $table->softDeletes();
+});
     }
 
     public function down(): void

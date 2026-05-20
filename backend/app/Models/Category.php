@@ -9,9 +9,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
 
+
+
 class Category extends Model
 {
-    use HasFactory, HasUuids;
+    use HasUuids ;
+    use HasFactory; 
+    protected $keyType = 'string';
+    public $incrementing = false;
 
     protected $fillable = ['name'];
 

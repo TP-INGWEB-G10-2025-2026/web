@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\MaterialController;
+use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TeacherController;
@@ -37,12 +39,16 @@ Route::get("/status", function (): JsonResponse {
     ], 200);
 });
 
+Route::apiResource('materials', MaterialController::class);
 
 
 // ── Public ────────────────────────────────────────────────
 Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
 });
+
+//Routes categories
+Route::apiResource('categories', CategoryController::class);
 
 // ── Authenticated ──────────────────────────────────────────
 Route::middleware(['auth:sanctum', 'auth.api'])->group(function () {
@@ -74,7 +80,8 @@ Route::middleware(['auth:sanctum', 'auth.api'])->group(function () {
         });
 
 
-
+    
 
     });
+
 });
