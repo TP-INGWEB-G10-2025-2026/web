@@ -36,5 +36,9 @@ class Material extends Model
     {
         return $this->status === MaterialStatus::Available;
     }
-}
 
+    public function loans(): HasMany
+    {
+        return $this->hasMany(Loan::class);
+    }
+}
