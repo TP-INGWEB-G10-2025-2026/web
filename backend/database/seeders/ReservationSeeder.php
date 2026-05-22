@@ -1,7 +1,11 @@
 <?php
 
+
 namespace Database\Seeders;
 
+use App\Enums\MaterialStatus;
+use App\Enums\Role;
+use App\Models\Category;
 use App\Models\Material;
 use App\Models\Reservation;
 use App\Models\User;
@@ -11,55 +15,57 @@ class ReservationSeeder extends Seeder
 {
     public function run(): void
     {
-        $teachers  = User::where('role', 'teacher')->get();
-        $materials = Material::where('status', 'available')->get();
 
-        if ($teachers->isEmpty() || $materials->isEmpty()) {
-            $this->command->warn('⚠️  Aucun enseignant ou matériel disponible pour le seeder.');
-            return;
+        $teachers  = User::where('role', Role::Teacher->value)->get();
+        $materials = Material::all();
+
+        if ($teachers->isEmpty()) {
+            $teachers = User::factory()->count(3)->create(['role' => Role::Teacher->value]);
+        }
+
+        if ($materials->isEmpty()) {
+            $category  = Category::first() ?? Category::factory()->create();
+            $materials = Material::factory()->count(10)->create(['category_id' => $category->id]);
         }
 
         $teacher1 = $teachers->first();
         $teacher2 = $teachers->count() > 1 ? $teachers->get(1) : $teacher1;
-        $material = $materials->first();
+        $mat1     = $materials->first();
+        $mat2     = $materials->count() > 1 ? $materials->get(1) : $mat1;
 
-        // Scénario 1 — Demande en attente (future)
-        Reservation::create([
-            'user_id'    => $teacher1->id,
-            'material_id'=> null,
-            'start_date' => now()->addDays(5)->toDateString(),
-            'end_date'   => now()->addDays(10)->toDateString(),
-            'status'     => Reservation::STATUS_PENDING,
+
+        Reservation::factory()->count(5)->pending()->create([
+            'user_id' => $teacher1->id,
         ]);
 
-        // Scénario 2 — Demande validée avec matériel assigné
-        Reservation::create([
+
+        Reservation::factory()->count(4)->validated()->create([
             'user_id'     => $teacher2->id,
-            'material_id' => $material->id,
-            'start_date'  => now()->addDays(15)->toDateString(),
-            'end_date'    => now()->addDays(20)->toDateString(),
-            'status'      => Reservation::STATUS_VALIDATED,
+            'material_id' => $mat1->id,
         ]);
 
-        // Scénario 3 — Demande rejetée avec raison
-        Reservation::create([
+
+        Reservation::factory()->count(3)->rejected()->create([
             'user_id'          => $teacher1->id,
-            'material_id'      => null,
-            'start_date'       => now()->subDays(5)->toDateString(),
-            'end_date'         => now()->subDays(2)->toDateString(),
-            'status'           => Reservation::STATUS_REJECTED,
-            'rejection_reason' => 'Matériel non disponible sur cette période.',
+            'material_id'      => $mat2->id,
+            'rejection_reason' => 'Matériel indisponible pour cette période.',
         ]);
 
-        // Scénario 4 — Demande annulée
-        Reservation::create([
-            'user_id'    => $teacher2->id,
-            'material_id'=> null,
-            'start_date' => now()->addDays(25)->toDateString(),
-            'end_date'   => now()->addDays(30)->toDateString(),
-            'status'     => Reservation::STATUS_CANCELLED,
+
+        Reservation::factory()->count(2)->cancelled()->create([
+            'user_id' => $teacher2->id,
         ]);
 
-        $this->command->info('✅ 4 réservations de test créées (pending, validated, rejected, cancelled).');
+
+        Reservation::factory()->validated()->forDates('2025-06-01', '2025-06-10')->create([
+            'user_id'     => $teacher1->id,
+            'material_id' => $mat1->id,
+        ]);
+
+        Reservation::factory()->pending()->forDates('2025-05-15', '2025-06-15')->create([
+            'user_id'     => $teacher2->id,
+            'material_id' => $mat1->id,
+        ]);
+
     }
 }
