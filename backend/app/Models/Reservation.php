@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\ReservationStatus;
+
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -24,36 +26,33 @@ class Reservation extends Model
     protected $casts = [
         'start_date' => 'date',
         'end_date'   => 'date',
-        'status'     => 'string',
+        'status'     => ReservationStatus::class,
     ];
 
     // ─── Statuts disponibles ─────────────────────────────────────
 
-    const STATUS_PENDING   = 'pending';
-    const STATUS_VALIDATED = 'validated';
-    const STATUS_REJECTED  = 'rejected';
-    const STATUS_CANCELLED = 'cancelled';
+
 
     // ─── Méthodes utilitaires ─────────────────────────────────────
 
     public function isPending(): bool
     {
-        return $this->status === self::STATUS_PENDING;
+        return $this->status === ReservationStatus::Pending;
     }
 
     public function isValidated(): bool
     {
-        return $this->status === self::STATUS_VALIDATED;
+        return $this->status === ReservationStatus::Validated;
     }
 
     public function isRejected(): bool
     {
-        return $this->status === self::STATUS_REJECTED;
+        return $this->status === ReservationStatus::Rejected;
     }
 
     public function isCancelled(): bool
     {
-        return $this->status === self::STATUS_CANCELLED;
+        return $this->status === ReservationStatus::Cancelled;
     }
 
     // ─── Relations ───────────────────────────────────────────────
@@ -80,11 +79,11 @@ class Reservation extends Model
     {
         return $query
             ->where('material_id', $materialId)
-            ->where('status', self::STATUS_VALIDATED)
+            ->where('status', ReservationStatus::Validated)
             ->where(function ($q) use ($start, $end) {
                 // Chevauchement : start ≤ end_demande ET end ≥ start_demande
                 $q->where('start_date', '<=', $end)
-                  ->where('end_date',   '>=', $start);
+                    ->where('end_date',   '>=', $start);
             });
     }
 
@@ -93,7 +92,7 @@ class Reservation extends Model
      */
     public function scopePending($query)
     {
-        return $query->where('status', self::STATUS_PENDING);
+        return $query->where('status', ReservationStatus::Pending);
     }
 
     /**
