@@ -1,17 +1,19 @@
 <?php
+// database/factories/UserFactory.php
 
 namespace Database\Factories;
 
+<<<<<<< HEAD
 use App\Models\User;
+=======
+use App\Enums\Role;
+>>>>>>> dev
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
-/**
- * @extends Factory<User>
- */
 class UserFactory extends Factory
 {
+<<<<<<< HEAD
     /**
      * The current password being used by the factory.
      */
@@ -41,5 +43,27 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
+=======
+    public function definition(): array
+    {
+        return [
+            'name'       => fake()->name(),
+            'email'      => fake()->unique()->safeEmail(),
+            'password'   => bcrypt('password'),
+            'role'       => Role::Teacher,
+            'is_blocked' => false,
+            'phone'      => fake()->phoneNumber(),
+        ];
+    }
+
+    public function admin(): static
+    {
+        return $this->state(fn () => ['role' => Role::Admin]);
+    }
+
+    public function blocked(): static
+    {
+        return $this->state(fn () => ['is_blocked' => true]);
+>>>>>>> dev
     }
 }
