@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Détails du matériel</title>
+</head>
+<body>
+
+    <h1>Détails du prêt</h1>
+
+    <div id="details"></div>
+
+    <a href="prets.html">Retour</a>
+
+    <script>
+
+        const params = new URLSearchParams(window.location.search);
+
+        const id = params.get("id");
+
+        const prets = JSON.parse(localStorage.getItem("prets"));
+
+        const pret = prets[id];
+
+        const details = document.getElementById("details");
+
+        details.innerHTML = `
+            <p>Matériel : ${pret.materiel}</p>
+            <p>Utilisateur : ${pret.utilisateur}</p>
+            <p>Date début : ${pret.dateDebut}</p>
+            <p>Date retour : ${pret.dateRetour}</p>
+            <p>État : ${pret.etat}</p>
+        `;
+
+    </script>
+
+</body>
+</html>
