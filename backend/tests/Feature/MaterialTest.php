@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\MaterialStatus;
-use App\Role;
+use App\Enums\Role;
 use App\Models\Category;
 use App\Models\Material;
 use App\Models\User;
