@@ -13,6 +13,19 @@ return [
     | a conventional file to locate the various service credentials.
     |
     */
+    'admin' => [
+        'email' => env('ADMIN_EMAIL', 'admin@yourplatform.com'),
+        'phone' => env('ADMIN_PHONE'),
+    ],
+    'sendgrid' => [
+        'api_key' => env('SENDGRID_API_KEY'),
+    ],
+
+    'twilio' => [
+        'sid'   => env('TWILIO_SID'),
+        'token' => env('TWILIO_TOKEN'),
+        'from'  => env('TWILIO_FROM'),
+    ],
 
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
