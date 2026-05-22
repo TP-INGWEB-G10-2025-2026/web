@@ -20,7 +20,8 @@ class DatabaseSeeder extends Seeder
             TeacherSeeder::class,
             CategorySeeder::class,
             MaterialSeeder::class,
-
+            ReservationSeeder::class,
+            LoanSeeder::class,
         ]);
     }
 }
