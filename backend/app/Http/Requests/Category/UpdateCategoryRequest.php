@@ -7,22 +7,16 @@ use Illuminate\Validation\Rule;
 
 class UpdateCategoryRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return $this->user()->isAdmin();
-    }
+    public function authorize(): bool { return true; }
 
     public function rules(): array
     {
-        // Ignore l'unicité pour la catégorie en cours de modification
-        $categoryId = $this->route('id');
-
         return [
             'name' => [
                 'sometimes',
                 'string',
                 'max:255',
-                Rule::unique('categories', 'name')->ignore($categoryId),
+                Rule::unique('categories', 'name')->ignore($this->route('id')),
             ],
         ];
     }
@@ -31,7 +25,7 @@ class UpdateCategoryRequest extends FormRequest
     {
         return [
             'name.unique' => 'Une catégorie avec ce nom existe déjà.',
-            'name.max'    => 'Le nom ne peut pas dépasser 255 caractères.',
+            'name.max'    => 'Le nom ne doit pas dépasser 255 caractères.',
         ];
     }
 }

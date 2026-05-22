@@ -1,15 +1,13 @@
 <?php
 
+
 namespace App\Http\Requests\Category;
 
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreCategoryRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return $this->user()->isAdmin();
-    }
+    public function authorize(): bool { return true; }
 
     public function rules(): array
     {
@@ -23,7 +21,7 @@ class StoreCategoryRequest extends FormRequest
         return [
             'name.required' => 'Le nom de la catégorie est obligatoire.',
             'name.unique'   => 'Une catégorie avec ce nom existe déjà.',
-            'name.max'      => 'Le nom ne peut pas dépasser 255 caractères.',
+            'name.max'      => 'Le nom ne doit pas dépasser 255 caractères.',
         ];
     }
 }

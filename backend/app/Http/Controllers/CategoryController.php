@@ -1,24 +1,21 @@
 <?php
 
+
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Category\StoreCategoryRequest;
 use App\Http\Requests\Category\UpdateCategoryRequest;
 use App\Http\Resources\Category\CategoryResource;
+use App\Models\Category;
 use App\Services\CategoryService;
 use Illuminate\Http\JsonResponse;
 
 class CategoryController extends Controller
 {
-    public function __construct(
-        private readonly CategoryService $categoryService
-    ) {}
+    public function __construct(private readonly CategoryService $categoryService) {}
 
-    // ─────────────────────────────────────────────────────────────
-    // GET /api/v1/categories
-    // Liste toutes les catégories avec le nombre de matériels liés
-    // ─────────────────────────────────────────────────────────────
-
+    /** GET /api/v1/categories */
     public function index(): JsonResponse
     {
         $categories = $this->categoryService->list();
@@ -28,59 +25,43 @@ class CategoryController extends Controller
         ]);
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // GET /api/v1/categories/{id}
-    // Détails d'une catégorie avec ses matériels associés
-    // ─────────────────────────────────────────────────────────────
-
+    /** GET /api/v1/categories/{id} */
     public function show(string $id): JsonResponse
     {
-        $category = $this->categoryService->find($id);
+        $category = $this->categoryService->findOrFail($id);
 
-        return response()->json(
-            new CategoryResource($category)
-        );
+        return response()->json([
+            'data' => new CategoryResource($category),
+        ]);
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // POST /api/v1/categories
-    // Créer une nouvelle catégorie
-    // ─────────────────────────────────────────────────────────────
-
+    /** POST /api/v1/categories */
     public function store(StoreCategoryRequest $request): JsonResponse
     {
         $category = $this->categoryService->create($request->validated());
 
         return response()->json([
-            'message'  => 'Catégorie créée avec succès.',
-            'category' => new CategoryResource($category),
+            'message' => 'Catégorie créée avec succès.',
+            'data'    => new CategoryResource($category),
         ], 201);
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // PUT /api/v1/categories/{id}
-    // Modifier une catégorie
-    // ─────────────────────────────────────────────────────────────
-
+    /** PUT /api/v1/categories/{id} */
     public function update(UpdateCategoryRequest $request, string $id): JsonResponse
     {
-        $category = $this->categoryService->find($id);
-        $updated  = $this->categoryService->update($category, $request->validated());
+        $category = Category::findOrFail($id);
+        $category = $this->categoryService->update($category, $request->validated());
 
         return response()->json([
-            'message'  => 'Catégorie mise à jour avec succès.',
-            'category' => new CategoryResource($updated),
+            'message' => 'Catégorie mise à jour avec succès.',
+            'data'    => new CategoryResource($category),
         ]);
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // DELETE /api/v1/categories/{id}
-    // Supprimer une catégorie (interdit si matériels liés → 422)
-    // ─────────────────────────────────────────────────────────────
-
+    /** DELETE /api/v1/categories/{id} */
     public function destroy(string $id): JsonResponse
     {
-        $category = $this->categoryService->find($id);
+        $category = Category::findOrFail($id);
         $this->categoryService->delete($category);
 
         return response()->json([

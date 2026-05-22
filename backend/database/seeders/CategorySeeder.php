@@ -10,11 +10,6 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            'Projecteurs',
-            'Ordinateurs',
-            'Capteurs & Arduino',
-            'Marqueurs & Tableau',
-            'Matériels de TP',
             'Informatique',
             'Audiovisuel',
             'Mobilier',
@@ -25,7 +20,5 @@ class CategorySeeder extends Seeder
         foreach ($categories as $name) {
             Category::firstOrCreate(['name' => $name]);
         }
-
-        $this->command->info(' 5 catégories créées.');
     }
 }

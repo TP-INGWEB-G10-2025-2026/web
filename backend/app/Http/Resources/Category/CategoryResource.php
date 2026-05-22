@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Category;
 
 use Illuminate\Http\Request;
+use App\Http\Resources\Material\MaterialResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class CategoryResource extends JsonResource
@@ -12,10 +13,10 @@ class CategoryResource extends JsonResource
         return [
             'id'             => $this->id,
             'name'           => $this->name,
-            // Nombre de matériels liés (disponible si withCount('materials') utilisé)
-            'materials_count' => $this->whenCounted('materials'),
-            'created_at'     => $this->created_at?->toIso8601String(),
-            'updated_at'     => $this->updated_at?->toIso8601String(),
+            'materials_count'=> $this->whenCounted('materials'),
+            'materials'      => MaterialResource::collection($this->whenLoaded('materials')),
+            'created_at'     => $this->created_at?->toISOString(),
+            'updated_at'     => $this->updated_at?->toISOString(),
         ];
     }
 }

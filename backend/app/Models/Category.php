@@ -15,20 +15,11 @@ class Category extends Model
 
     protected $fillable = ['name'];
 
-    // ─── Relations ───────────────────────────────────────────────
-
     public function materials(): HasMany
     {
         return $this->hasMany(Material::class);
     }
 
-    // ─── Scopes ──────────────────────────────────────────────────
-
-    /**
-     * Scope withMaterialCount : charge le nombre de matériels liés.
-     * Usage : Category::withMaterialCount()->get()
-     */
-    public function scopeWithMaterialCount($query)
     /**
      * Scope to load material count.
      */
