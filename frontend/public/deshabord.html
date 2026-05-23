@@ -1,61 +1,87 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Admin</title>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
 
-<link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
 <nav>
-    <h2>Dashboard Admin</h2>
+
+    <h2>Dashboard Administrateur</h2>
 
     <button onclick="logout()">
         Déconnexion
     </button>
+
 </nav>
 
 <div class="dashboard">
 
     <div class="form-box">
 
-        <h3>Ajouter Enseignant</h3>
+        <h2>Menu principal</h2>
 
-        <input type="text" id="name" placeholder="Nom">
-
-        <input type="email" id="teacherEmail" placeholder="Email">
-
-        <button onclick="addTeacher()">
-            Ajouter
+        <button onclick="ouvrirPage('Utilisateur.html')">
+            Gestion utilisateurs
         </button>
 
-    </div>
+        <button onclick="ouvrirPage('Matériels.html')">
+            Gestion matériels
+        </button>
 
-    <div class="table-box">
+        <button onclick="ouvrirPage('prets.html')">
+            Gestion prêts
+        </button>
 
-        <h3>Liste des enseignants</h3>
+        <button onclick="ouvrirPage('retours.html')">
+            Gestion retours
+        </button>
 
-        <table>
+        <button onclick="ouvrirPage('historique.html')">
+            Historique
+        </button>
 
-            <thead>
-                <tr>
-                    <th>Nom</th>
-                    <th>Email</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
+        <button onclick="ouvrirPage('statistiques.html')">
+            Statistiques
+        </button>
 
-            <tbody id="teacherList"></tbody>
+        <button onclick="ouvrirPage('reservations.html')">
+            Réservations
+        </button>
 
-        </table>
+        <button onclick="ouvrirPage('validation.html')">
+            Validation
+        </button>
+
+        <button onclick="ouvrirPage('categories.html')">
+            Catégories
+        </button>
+
+        <button onclick="ouvrirPage('maintenance.html')">
+            Maintenance
+        </button>
+
+        <button onclick="ouvrirPage('disponibilites.html')">
+            Disponibilités
+        </button>
+
+        <button onclick="ouvrirPage('notification.html')">
+            Notifications
+        </button>
+
+        <button onclick="ouvrirPage('profil.html')">
+            Profil
+        </button>
 
     </div>
 
 </div>
 
-<script src="js/admin.js"></script>
+<script src="js/logout.js"></script>
+<script src="js/Deshabord.js"></script>
 
 </body>
 </html>

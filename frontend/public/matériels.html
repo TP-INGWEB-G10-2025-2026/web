@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion des matériels</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav>
+
+    <h2>Gestion des matériels</h2>
+
+    <button onclick="logout()">
+        Déconnexion
+    </button>
+
+</nav>
+
+<div class="dashboard">
+
+    <div class="form-box">
+
+        <h2>Ajouter matériel</h2>
+
+        <form id="materielForm">
+
+            <label>Nom matériel</label>
+
+            <input type="text" id="materielNom">
+
+            <label>Catégorie</label>
+
+            <input type="text" id="materielCategorie">
+
+            <label>État</label>
+
+            <select id="materielEtat">
+
+                <option>Disponible</option>
+                <option>En cours d'utilisation</option>
+                <option>En panne</option>
+                <option>En maintenance</option>
+
+            </select>
+
+            <button type="submit">
+                Ajouter matériel
+            </button>
+
+        </form>
+
+    </div>
+
+    <div class="table-box">
+
+        <h2>Liste matériels</h2>
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Nom</th>
+                    <th>Catégorie</th>
+                    <th>État</th>
+                    <th>Actions</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody id="listeMateriels"></tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/logout.js"></script>
+<script src="js/Matériel.js"></script>
+
+</body>
+</html>

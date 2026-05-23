@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion des prêts</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav>
+
+    <h2>Gestion des prêts</h2>
+
+    <button onclick="logout()">
+        Déconnexion
+    </button>
+
+</nav>
+
+<div class="dashboard">
+
+    <div class="form-box">
+
+        <h2>Enregistrer un prêt</h2>
+
+        <form id="pretForm">
+
+            <label>Utilisateur</label>
+
+            <input type="text" id="utilisateur">
+
+            <label>Matériel</label>
+
+            <input type="text" id="materiel">
+
+            <label>Date début</label>
+
+            <input type="date" id="dateDebut">
+
+            <label>Date retour</label>
+
+            <input type="date" id="dateRetour">
+
+            <button type="submit">
+                Ajouter prêt
+            </button>
+
+        </form>
+
+    </div>
+
+    <div class="table-box">
+
+        <h2>Liste des prêts</h2>
+
+        <ul id="listePrets"></ul>
+
+    </div>
+
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/logout.js"></script>
+<script src="js/prets.js"></script>
+
+</body>
+</html>

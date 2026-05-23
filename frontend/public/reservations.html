@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Réservations</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav>
+
+    <h2>Gestion des réservations</h2>
+
+    <button onclick="logout()">
+        Déconnexion
+    </button>
+
+</nav>
+
+<div class="dashboard">
+
+    <div class="form-box">
+
+        <h2>Nouvelle réservation</h2>
+
+        <form id="reservationForm">
+
+            <label>Utilisateur</label>
+
+            <input type="text" id="reservationUser">
+
+            <label>Matériel</label>
+
+            <input type="text" id="reservationMateriel">
+
+            <label>Date début</label>
+
+            <input type="date" id="reservationDebut">
+
+            <label>Date fin</label>
+
+            <input type="date" id="reservationFin">
+
+            <button type="submit">
+                Réserver
+            </button>
+
+        </form>
+
+    </div>
+
+    <div class="table-box">
+
+        <h2>Liste des réservations</h2>
+
+        <ul id="listeReservations"></ul>
+
+    </div>
+
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/logout.js"></script>
+<script src="js/reservations.js"></script>
+
+</body>
+</html>
