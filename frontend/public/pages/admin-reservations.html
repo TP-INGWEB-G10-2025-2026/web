@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestion des réservations — RéservApp</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">📅</div>
+      <div>
+        <h1>RéservApp</h1>
+        <span>Gestion du matériel</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <p class="nav-section-title">Espace Enseignant</p>
+      <a href="teacher-new-reservation.html" class="nav-link">
+        <span class="nav-icon">➕</span> Nouvelle demande
+      </a>
+      <a href="teacher-reservations.html" class="nav-link">
+        <span class="nav-icon">📋</span> Mes réservations
+      </a>
+      <p class="nav-section-title">Espace Administrateur</p>
+      <a href="admin-reservations.html" class="nav-link active">
+        <span class="nav-icon">📊</span> Toutes les demandes
+      </a>
+      <a href="admin-validate.html" class="nav-link">
+        <span class="nav-icon">✅</span> Valider une demande
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-avatar">AE</div>
+      <div class="user-info">
+        <div class="user-name">Admin École</div>
+        <div class="user-role">Administrateur</div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <span class="topbar-title">Toutes les demandes de réservation</span>
+      <div class="topbar-actions">
+        <button class="btn btn-primary btn-sm" onclick="loadReservations()">🔄 Actualiser</button>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- Stats -->
+      <div class="stats-grid fade-in-up">
+        <div class="stat-card">
+          <span class="stat-icon">📋</span>
+          <span class="stat-label">Total</span>
+          <span class="stat-value" id="stat-total">—</span>
+        </div>
+        <div class="stat-card" style="border-left:4px solid var(--orange);">
+          <span class="stat-icon">🕐</span>
+          <span class="stat-label">En attente</span>
+          <span class="stat-value" id="stat-pending" style="color:var(--orange);">—</span>
+        </div>
+        <div class="stat-card" style="border-left:4px solid var(--green-500);">
+          <span class="stat-icon">✅</span>
+          <span class="stat-label">Validées</span>
+          <span class="stat-value" id="stat-validated" style="color:var(--green-600);">—</span>
+        </div>
+        <div class="stat-card" style="border-left:4px solid var(--red);">
+          <span class="stat-icon">❌</span>
+          <span class="stat-label">Rejetées</span>
+          <span class="stat-value" id="stat-rejected" style="color:var(--red);">—</span>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="card fade-in-up" style="margin-bottom:20px;animation-delay:.05s;">
+        <div class="card-body" style="padding:16px 24px;">
+          <div class="filters-bar" style="margin-bottom:0;">
+            <div class="filter-group">
+              <label class="filter-label">Statut</label>
+              <select class="filter-control" id="filter-status" onchange="applyFilters()">
+                <option value="all">Tous les statuts</option>
+                <option value="pending">En attente</option>
+                <option value="validated">Validées</option>
+                <option value="rejected">Rejetées</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Enseignant</label>
+              <select class="filter-control" id="filter-user" onchange="applyFilters()">
+                <option value="all">Tous les enseignants</option>
+                <option value="1">Marie Dupont</option>
+                <option value="2">Jean Martin</option>
+                <option value="3">Sophie Bernard</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Date début (après le)</label>
+              <input type="date" class="filter-control" id="filter-start" onchange="applyFilters()">
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Date fin (avant le)</label>
+              <input type="date" class="filter-control" id="filter-end" onchange="applyFilters()">
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="resetFilters()" style="margin-top:22px;">Réinitialiser</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="card fade-in-up" style="animation-delay:.1s;">
+        <div class="card-header">
+          <span class="card-title">Liste des demandes</span>
+          <span id="result-count" style="font-size:.82rem;color:var(--gray-400);"></span>
+        </div>
+
+        <div id="table-container">
+          <div style="padding:40px;text-align:center;color:var(--gray-400);">
+            <div class="spinner" style="margin:0 auto 12px;border-color:var(--gray-200);border-top-color:var(--green-500);"></div>
+            Chargement...
+          </div>
+        </div>
+
+        <div class="pagination" id="pagination" style="display:none;">
+          <button class="page-btn">‹</button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">›</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal-backdrop" id="reject-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">❌ Rejeter la demande</span>
+      <button class="modal-close" onclick="closeModal('reject-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.9rem;color:var(--gray-600);margin-bottom:16px;">
+        Vous êtes sur le point de rejeter la demande de <strong id="reject-user-name"></strong>.
+      </p>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" for="reject-reason">Raison du rejet (optionnel)</label>
+        <textarea class="form-control" id="reject-reason" rows="3" placeholder="Expliquez la raison du rejet..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('reject-modal')">Annuler</button>
+      <button class="btn btn-danger" id="confirm-reject-btn" onclick="confirmReject()">
+        ❌ Confirmer le rejet
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/app.js"></script>
+<script>
+  let allReservations = [];
+  let currentRejectId = null;
+
+  async function loadReservations() {
+    try {
+      allReservations = await API.getReservations();
+      updateStats();
+      applyFilters();
+    } catch(e) {
+      document.getElementById("table-container").innerHTML =
+        `<div class="alert alert-error" style="margin:20px;">Erreur de chargement.</div>`;
+    }
+  }
+
+  function updateStats() {
+    document.getElementById("stat-total").textContent = allReservations.length;
+    document.getElementById("stat-pending").textContent = allReservations.filter(r => r.status === "pending").length;
+    document.getElementById("stat-validated").textContent = allReservations.filter(r => r.status === "validated").length;
+    document.getElementById("stat-rejected").textContent = allReservations.filter(r => r.status === "rejected").length;
+  }
+
+  function applyFilters() {
+    const status = document.getElementById("filter-status").value;
+    const userId = document.getElementById("filter-user").value;
+    const startFilter = document.getElementById("filter-start").value;
+    const endFilter = document.getElementById("filter-end").value;
+
+    let list = [...allReservations];
+    if (status !== "all") list = list.filter(r => r.status === status);
+    if (userId !== "all") list = list.filter(r => String(r.user.id) === userId);
+    if (startFilter) list = list.filter(r => r.start_date >= startFilter);
+    if (endFilter) list = list.filter(r => r.end_date <= endFilter);
+
+    document.getElementById("result-count").textContent = `${list.length} résultat(s)`;
+    renderTable(list);
+  }
+
+  function resetFilters() {
+    document.getElementById("filter-status").value = "all";
+    document.getElementById("filter-user").value = "all";
+    document.getElementById("filter-start").value = "";
+    document.getElementById("filter-end").value = "";
+    applyFilters();
+  }
+
+  function renderTable(reservations) {
+    const container = document.getElementById("table-container");
+
+    if (reservations.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">🔍</div>
+          <div class="empty-state-title">Aucune demande trouvée</div>
+          <div class="empty-state-text">Modifiez les filtres pour voir plus de résultats.</div>
+        </div>`;
+      return;
+    }
+
+    const rows = reservations.map(r => {
+      const isPending = r.status === "pending";
+      const material = r.material
+        ? `${r.material.icon} ${r.material.name}`
+        : `<span style="color:var(--gray-400);font-size:.82rem;">Non attribué</span>`;
+
+      const actions = isPending ? `
+        <div style="display:flex;gap:6px;">
+          <a href="admin-validate.html?id=${r.id}" class="btn btn-primary btn-sm">✅ Valider</a>
+          <button class="btn btn-danger btn-sm" onclick="openRejectModal(${r.id}, '${r.user.name}')">❌ Rejeter</button>
+        </div>` : `
+        <a href="admin-validate.html?id=${r.id}" class="btn btn-ghost btn-sm">👁 Voir</a>`;
+
+      return `
+        <tr class="${isPending ? 'highlight' : ''}">
+          <td>
+            <div style="font-weight:500;">${r.user.name}</div>
+            <div style="font-size:.78rem;color:var(--gray-400);">${r.user.email}</div>
+          </td>
+          <td>
+            <div style="font-weight:500;">${formatDate(r.start_date)}</div>
+            <div style="font-size:.78rem;color:var(--gray-400);">→ ${formatDate(r.end_date)}</div>
+          </td>
+          <td>${material}</td>
+          <td>${statusBadge(r.status)}</td>
+          <td>${actions}</td>
+        </tr>`;
+    }).join("");
+
+    container.innerHTML = `
+      <div class="table-wrap" style="border:none;border-radius:0;">
+        <table>
+          <thead>
+            <tr>
+              <th>Enseignant</th>
+              <th>Période</th>
+              <th>Matériel</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }
+
+  function openRejectModal(id, userName) {
+    currentRejectId = id;
+    document.getElementById("reject-user-name").textContent = userName;
+    document.getElementById("reject-reason").value = "";
+    openModal("reject-modal");
+  }
+
+  async function confirmReject() {
+    const btn = document.getElementById("confirm-reject-btn");
+    const reason = document.getElementById("reject-reason").value.trim();
+    btn.disabled = true;
+    btn.innerHTML = `<div class="spinner"></div> Rejet en cours...`;
+
+    try {
+      await API.rejectReservation(currentRejectId, reason);
+      closeModal("reject-modal");
+      showToast("Demande rejetée avec succès.", "success");
+      allReservations = await API.getReservations();
+      updateStats();
+      applyFilters();
+    } catch(e) {
+      showToast("Erreur lors du rejet.", "error");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = `❌ Confirmer le rejet`;
+    }
+  }
+
+  loadReservations();
+</script>
+</body>
+</html>
