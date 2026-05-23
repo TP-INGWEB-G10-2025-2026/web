@@ -9,7 +9,7 @@ if(!localStorage.getItem("utilisateurs")){
 
 if(!localStorage.getItem("materiels")){
 
-    localStorage.setItem(
+    localStorage.setItem(  
         "materiels",
         JSON.stringify([])
     );
