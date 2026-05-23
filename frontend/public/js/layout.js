@@ -1,68 +1,82 @@
-// Layout builder
-function buildLayout({ role = "teacher", pageTitle = "", activePage = "" }) {
-  const teacherLinks = `
-    <p class="nav-section-title">Espace Enseignant</p>
-    <a href="../pages/teacher-new-reservation.html" class="nav-link ${activePage === "new" ? "active" : ""}">
-      <span class="nav-icon">➕</span> Nouvelle demande
-    </a>
-    <a href="../pages/teacher-reservations.html" class="nav-link ${activePage === "my-res" ? "active" : ""}">
-      <span class="nav-icon">📋</span> Mes réservations
-    </a>
-  `;
+// layout.js — shared sidebar + topbar logic
 
-  const adminLinks = `
-    <p class="nav-section-title">Espace Administrateur</p>
-    <a href="../pages/admin-reservations.html" class="nav-link ${activePage === "admin-list" ? "active" : ""}">
-      <span class="nav-icon">📊</span> Toutes les demandes
-    </a>
-    <a href="../pages/admin-validate.html" class="nav-link ${activePage === "admin-validate" ? "active" : ""}">
-      <span class="nav-icon">✅</span> Valider une demande
-    </a>
-  `;
+const NAV_LINKS = [
+  { href: 'dashboard.html', icon: '📊', label: 'Tableau de bord', section: null },
+  { href: 'teachers.html', icon: '👩‍🏫', label: 'Enseignants', section: 'Gestion' },
+  { href: 'profile.html', icon: '👤', label: 'Mon profil', section: null },
+];
 
-  const userName = role === "admin" ? "Admin École" : "Marie Dupont";
-  const userInitials = role === "admin" ? "AE" : "MD";
+function buildSidebar(activePage) {
+  const user = JSON.parse(localStorage.getItem('edu_user') || '{"name":"Admin Demo","role":"admin"}');
+  const initials = user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+
+  let navHTML = '';
+  let lastSection = null;
+
+  NAV_LINKS.forEach(link => {
+    if (link.section && link.section !== lastSection) {
+      navHTML += `<div class="nav-section-title">${link.section}</div>`;
+      lastSection = link.section;
+    }
+    const active = activePage === link.href ? 'active' : '';
+    navHTML += `
+      <a href="${link.href}" class="nav-link ${active}">
+        <span class="nav-icon">${link.icon}</span>
+        ${link.label}
+      </a>`;
+  });
 
   return `
-  <div class="layout">
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-logo">
-        <div class="logo-icon">📅</div>
+        <div class="logo-icon">🎓</div>
         <div>
-          <h1>RéservApp</h1>
-          <span>Gestion du matériel</span>
+          <h1>EduAdmin</h1>
+          <span>Gestion scolaire</span>
         </div>
       </div>
       <nav class="sidebar-nav">
-        ${role === "teacher" ? teacherLinks : ""}
-        ${role === "admin" ? teacherLinks + adminLinks : ""}
+        ${navHTML}
       </nav>
       <div class="sidebar-footer">
-        <div class="user-avatar">${userInitials}</div>
+        <div class="user-avatar">${initials}</div>
         <div class="user-info">
-          <div class="user-name">${userName}</div>
-          <div class="user-role">${role === "admin" ? "Administrateur" : "Enseignant"}</div>
+          <div class="user-name">${user.name}</div>
+          <div class="user-role">${user.role === 'admin' ? 'Administrateur' : 'Enseignant'}</div>
         </div>
+        <button class="btn btn-ghost btn-sm" onclick="logout()" title="Déconnexion" style="padding:6px 8px; flex-shrink:0">🚪</button>
       </div>
-    </aside>
-    <div class="main">
-      <header class="topbar">
-        <div style="display:flex;align-items:center;gap:12px;">
-          <button class="btn btn-ghost" onclick="toggleSidebar()" style="display:none;" id="menu-btn">☰</button>
-          <span class="topbar-title">${pageTitle}</span>
-        </div>
-        <div class="topbar-actions">
-          <span style="font-size:.82rem;color:var(--gray-400);">Démo — Interface statique</span>
-        </div>
-      </header>
-      <div class="page-content" id="page-content">
-  `;
+    </aside>`;
 }
 
-function closeLayout() {
+function buildTopbar(title) {
   return `
-      </div><!-- /page-content -->
-    </div><!-- /main -->
-  </div><!-- /layout -->
-  `;
+    <header class="topbar">
+      <button class="btn btn-ghost" id="menu-toggle" onclick="toggleSidebar()" style="display:none">☰</button>
+      <span class="topbar-title">${title}</span>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="window.location.href='profile.html'" title="Profil">👤</button>
+        <button class="btn btn-ghost btn-sm" onclick="logout()" title="Déconnexion">🚪</button>
+      </div>
+    </header>`;
+}
+
+function initLayout(activePage, topbarTitle) {
+  const layout = document.getElementById('app-layout');
+  if (!layout) return;
+  layout.innerHTML = buildSidebar(activePage) + `<div class="main" id="main-content">${buildTopbar(topbarTitle)}<div class="page-content" id="page-content"></div></div>`;
+
+  // responsive
+  if (window.innerWidth <= 768) {
+    document.getElementById('menu-toggle').style.display = 'flex';
+  }
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+function logout() {
+  localStorage.removeItem('edu_user');
+  window.location.href = 'login.html';
 }
