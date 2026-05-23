@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RéservApp — Gestion du matériel scolaire</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { background: var(--green-900); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+
+    .welcome-card {
+      background: var(--white);
+      border-radius: 24px;
+      padding: 48px 40px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 24px 80px rgba(0,0,0,.3);
+      animation: fadeInUp .5s ease;
+    }
+
+    .welcome-logo {
+      width: 64px; height: 64px;
+      background: linear-gradient(135deg, var(--green-500), var(--green-700));
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 24px rgba(5,150,105,.3);
+    }
+
+    .welcome-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--green-900);
+      margin-bottom: 8px;
+    }
+
+    .welcome-sub {
+      color: var(--gray-400);
+      font-size: .95rem;
+      margin-bottom: 36px;
+      line-height: 1.5;
+    }
+
+    .role-cards { display: grid; gap: 12px; margin-bottom: 32px; }
+
+    .role-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 20px;
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius);
+      text-decoration: none;
+      transition: all .2s;
+      color: inherit;
+    }
+    .role-card:hover { border-color: var(--green-500); box-shadow: var(--shadow); transform: translateY(-2px); }
+
+    .role-icon {
+      width: 46px; height: 46px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    .role-icon.teacher { background: var(--green-100); }
+    .role-icon.admin   { background: #ede9fe; }
+
+    .role-label { font-size: .72rem; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: .08em; }
+    .role-name  { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; color: var(--green-900); }
+    .role-desc  { font-size: .8rem; color: var(--gray-400); margin-top: 2px; }
+    .role-arrow { margin-left: auto; color: var(--green-600); font-size: 1.2rem; }
+
+    .divider-text {
+      text-align: center;
+      color: var(--gray-400);
+      font-size: .8rem;
+      margin-bottom: 20px;
+      position: relative;
+    }
+    .divider-text::before, .divider-text::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 38%;
+      height: 1px;
+      background: var(--gray-200);
+    }
+    .divider-text::before { left: 0; }
+    .divider-text::after  { right: 0; }
+
+    .pages-list { display: grid; gap: 8px; }
+    .page-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      color: var(--gray-600);
+      font-size: .88rem;
+      transition: all .15s;
+    }
+    .page-link:hover { background: var(--green-50); color: var(--green-700); }
+    .page-link .pill {
+      font-size: .65rem;
+      padding: 2px 8px;
+      border-radius: 100px;
+      font-weight: 600;
+      margin-left: auto;
+    }
+    .pill-teacher { background: var(--green-100); color: var(--green-800); }
+    .pill-admin   { background: #ede9fe; color: #6d28d9; }
+  </style>
+</head>
+<body>
+
+<div class="welcome-card">
+  <div class="welcome-logo">📅</div>
+  <div class="welcome-title">RéservApp</div>
+  <div class="welcome-sub">Système de gestion et réservation du matériel scolaire. Choisissez votre espace pour accéder à l'interface.</div>
+
+  <div class="role-cards">
+    <a href="pages/teacher-new-reservation.html" class="role-card">
+      <div class="role-icon teacher">👩‍🏫</div>
+      <div>
+        <div class="role-label">Espace</div>
+        <div class="role-name">Enseignant</div>
+        <div class="role-desc">Soumettre et suivre vos demandes</div>
+      </div>
+      <span class="role-arrow">→</span>
+    </a>
+    <a href="pages/admin-reservations.html" class="role-card">
+      <div class="role-icon admin">🛡️</div>
+      <div>
+        <div class="role-label">Espace</div>
+        <div class="role-name">Administrateur</div>
+        <div class="role-desc">Gérer, valider et rejeter les demandes</div>
+      </div>
+      <span class="role-arrow">→</span>
+    </a>
+  </div>
+
+  <div class="divider-text">Toutes les pages</div>
+
+  <div class="pages-list">
+    <a href="pages/teacher-new-reservation.html" class="page-link">
+      <span>➕</span> Soumettre une demande
+      <span class="pill pill-teacher">Enseignant</span>
+    </a>
+    <a href="pages/teacher-reservations.html" class="page-link">
+      <span>📋</span> Mes réservations
+      <span class="pill pill-teacher">Enseignant</span>
+    </a>
+    <a href="pages/admin-reservations.html" class="page-link">
+      <span>📊</span> Liste des demandes
+      <span class="pill pill-admin">Admin</span>
+    </a>
+    <a href="pages/admin-validate.html?id=1" class="page-link">
+      <span>✅</span> Valider une demande (ex. #1)
+      <span class="pill pill-admin">Admin</span>
+    </a>
+  </div>
+</div>
+
+<script src="css/../js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Valider une demande — RéservApp</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">📅</div>
+      <div>
+        <h1>RéservApp</h1>
+        <span>Gestion du matériel</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <p class="nav-section-title">Espace Enseignant</p>
+      <a href="teacher-new-reservation.html" class="nav-link">
+        <span class="nav-icon">➕</span> Nouvelle demande
+      </a>
+      <a href="teacher-reservations.html" class="nav-link">
+        <span class="nav-icon">📋</span> Mes réservations
+      </a>
+      <p class="nav-section-title">Espace Administrateur</p>
+      <a href="admin-reservations.html" class="nav-link">
+        <span class="nav-icon">📊</span> Toutes les demandes
+      </a>
+      <a href="admin-validate.html" class="nav-link active">
+        <span class="nav-icon">✅</span> Valider une demande
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-avatar">AE</div>
+      <div class="user-info">
+        <div class="user-name">Admin École</div>
+        <div class="user-role">Administrateur</div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <a href="admin-reservations.html" class="btn btn-ghost btn-sm">← Retour</a>
+        <span class="topbar-title">Valider une demande</span>
+      </div>
+    </header>
+
+    <div class="page-content" id="main-content">
+      <!-- Loaded dynamically -->
+      <div style="padding:40px;text-align:center;color:var(--gray-400);">
+        <div class="spinner" style="margin:0 auto 12px;border-color:var(--gray-200);border-top-color:var(--green-500);"></div>
+        Chargement de la demande...
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal-backdrop" id="confirm-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">✅ Confirmer la validation</span>
+      <button class="modal-close" onclick="closeModal('confirm-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.9rem;color:var(--gray-600);margin-bottom:20px;">
+        Vous êtes sur le point de valider cette demande avec le matériel sélectionné.
+      </p>
+      <ul class="details-list">
+        <li>
+          <span class="dl-label">👤 Enseignant</span>
+          <span class="dl-value" id="modal-teacher">—</span>
+        </li>
+        <li>
+          <span class="dl-label">📅 Période</span>
+          <span class="dl-value" id="modal-period">—</span>
+        </li>
+        <li>
+          <span class="dl-label">🔧 Matériel attribué</span>
+          <span class="dl-value" id="modal-material">—</span>
+        </li>
+      </ul>
+      <div class="alert alert-info" style="margin-top:16px;margin-bottom:0;">
+        <span class="alert-icon">ℹ️</span>
+        <span>L'enseignant et l'administrateur seront notifiés par email et SMS.</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('confirm-modal')">Annuler</button>
+      <button class="btn btn-primary" id="final-validate-btn" onclick="confirmValidation()">
+        <span>✅</span> Valider définitivement
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/app.js"></script>
+<script>
+  // Get reservation ID from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const reservationId = parseInt(urlParams.get("id")) || 1;
+
+  let currentReservation = null;
+  let availableMaterials = [];
+  let selectedMaterialId = null;
+
+  async function init() {
+    try {
+      // Load reservation
+      currentReservation = await API.getReservation(reservationId);
+
+      if (!currentReservation) {
+        showError("Demande introuvable.");
+        return;
+      }
+
+      // Load available materials for the period
+      availableMaterials = await API.getAvailable(
+        currentReservation.start_date,
+        currentReservation.end_date
+      );
+
+      renderPage();
+    } catch(e) {
+      showError("Erreur lors du chargement.");
+    }
+  }
+
+  function showError(msg) {
+    document.getElementById("main-content").innerHTML = `
+      <div class="alert alert-error">${msg}</div>
+      <a href="admin-reservations.html" class="btn btn-outline">← Retour à la liste</a>`;
+  }
+
+  function renderPage() {
+    const r = currentReservation;
+    const isAlreadyProcessed = r.status !== "pending";
+
+    const processedBanner = isAlreadyProcessed ? `
+      <div class="alert alert-${r.status === 'validated' ? 'success' : 'error'}" style="margin-bottom:24px;">
+        <span class="alert-icon">${r.status === 'validated' ? '✅' : '❌'}</span>
+        <div>
+          Cette demande a déjà été <strong>${r.status === 'validated' ? 'validée' : 'rejetée'}</strong>.
+          ${r.rejection_reason ? `<br><em>Raison : ${r.rejection_reason}</em>` : ""}
+        </div>
+      </div>` : "";
+
+    const materialsHtml = availableMaterials.length === 0
+      ? `<div class="alert alert-error">
+           <span class="alert-icon">⚠️</span>
+           Aucun matériel disponible sur cette période. Impossible de valider.
+         </div>`
+      : `<div class="material-grid" id="material-grid">
+          ${availableMaterials.map(m => `
+            <div class="material-card" id="mat-${m.id}" onclick="selectMaterial(${m.id}, '${m.name}', '${m.icon}')">
+              <div style="display:flex;justify-content:space-between;align-items:start;">
+                <div class="material-card-icon">${m.icon}</div>
+                <span class="check">✓</span>
+              </div>
+              <div class="material-card-name">${m.name}</div>
+              <div class="material-card-category">${m.category}</div>
+            </div>`).join("")}
+        </div>`;
+
+    document.getElementById("main-content").innerHTML = `
+      ${processedBanner}
+
+      <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:24px;align-items:start;" class="fade-in-up">
+
+        <!-- Left: Reservation summary -->
+        <div>
+          <div class="card" style="margin-bottom:20px;">
+            <div class="card-header">
+              <span class="card-title">📋 Récapitulatif de la demande</span>
+              ${statusBadge(r.status)}
+            </div>
+            <div class="card-body">
+              <ul class="details-list">
+                <li>
+                  <span class="dl-label">👤 Enseignant</span>
+                  <span class="dl-value">
+                    <strong>${r.user.name}</strong><br>
+                    <small style="color:var(--gray-400);">${r.user.email}</small>
+                  </span>
+                </li>
+                <li>
+                  <span class="dl-label">📅 Date début</span>
+                  <span class="dl-value">${formatDate(r.start_date)}</span>
+                </li>
+                <li>
+                  <span class="dl-label">📅 Date fin</span>
+                  <span class="dl-value">${formatDate(r.end_date)}</span>
+                </li>
+                <li>
+                  <span class="dl-label">🗓 Soumis le</span>
+                  <span class="dl-value">${formatDate(r.created_at)}</span>
+                </li>
+                <li>
+                  <span class="dl-label">🔧 Matériel actuel</span>
+                  <span class="dl-value" style="color:var(--gray-400);">
+                    ${r.material ? r.material.icon + " " + r.material.name : "Non attribué"}
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Action buttons -->
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <button class="btn btn-primary" id="validate-btn" onclick="openValidateConfirm()" disabled ${isAlreadyProcessed ? "style='display:none'" : ""}>
+              <span>✅</span> Confirmer la validation
+            </button>
+            ${!isAlreadyProcessed ? `<a href="admin-reservations.html" class="btn btn-outline">Retour à la liste</a>` : `<a href="admin-reservations.html" class="btn btn-primary">← Retour à la liste</a>`}
+          </div>
+        </div>
+
+        <!-- Right: Material selection -->
+        <div ${isAlreadyProcessed ? "style='opacity:.6;pointer-events:none;'" : ""}>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">🔧 Sélectionner un matériel</span>
+              <span style="font-size:.8rem;color:var(--gray-400);">${availableMaterials.length} disponible(s)</span>
+            </div>
+            <div class="card-body">
+              <p style="font-size:.85rem;color:var(--gray-600);margin-bottom:16px;">
+                Ces matériels sont libres du <strong>${formatDate(r.start_date)}</strong> au <strong>${formatDate(r.end_date)}</strong>.
+                Cliquez sur une carte pour la sélectionner.
+              </p>
+              ${materialsHtml}
+              <div id="selection-info" style="margin-top:16px;display:none;">
+                <div class="alert alert-success" style="margin-bottom:0;">
+                  <span class="alert-icon">✅</span>
+                  <span id="selection-text"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>`;
+  }
+
+  function selectMaterial(id, name, icon) {
+    // Deselect all
+    document.querySelectorAll(".material-card").forEach(c => c.classList.remove("selected"));
+    // Select chosen
+    document.getElementById(`mat-${id}`)?.classList.add("selected");
+    selectedMaterialId = id;
+
+    document.getElementById("selection-info").style.display = "block";
+    document.getElementById("selection-text").textContent = `${icon} ${name} sélectionné`;
+    document.getElementById("validate-btn").disabled = false;
+  }
+
+  function openValidateConfirm() {
+    if (!selectedMaterialId) return;
+    const r = currentReservation;
+    const mat = availableMaterials.find(m => m.id === selectedMaterialId);
+
+    document.getElementById("modal-teacher").textContent = r.user.name;
+    document.getElementById("modal-period").textContent = `${formatDate(r.start_date)} → ${formatDate(r.end_date)}`;
+    document.getElementById("modal-material").textContent = `${mat.icon} ${mat.name}`;
+    openModal("confirm-modal");
+  }
+
+  async function confirmValidation() {
+    const btn = document.getElementById("final-validate-btn");
+    btn.disabled = true;
+    btn.innerHTML = `<div class="spinner"></div> Validation...`;
+
+    try {
+      await API.validateReservation(reservationId, selectedMaterialId);
+      closeModal("confirm-modal");
+      showToast("Demande validée ! L'enseignant a été notifié.", "success");
+      setTimeout(() => { window.location.href = "admin-reservations.html"; }, 1500);
+    } catch(e) {
+      showToast("Erreur lors de la validation.", "error");
+      btn.disabled = false;
+      btn.innerHTML = `<span>✅</span> Valider définitivement`;
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>
