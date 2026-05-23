@@ -1,16 +1,91 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Accueil</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EduPlatform</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #f5f5f0;
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+
+    /* ── Router outlet ── */
+    #app {
+      min-height: 100vh;
+    }
+
+    /* ── Loading state ── */
+    .page-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-size: 15px;
+      color: #888;
+      gap: 10px;
+    }
+
+    .page-loading::before {
+      content: '';
+      width: 18px;
+      height: 18px;
+      border: 2px solid #ddd;
+      border-top-color: #1a1a1a;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Error / 404 state ── */
+    .page-error {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      gap: 12px;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .page-error h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+    }
+
+    .page-error p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .page-error a,
+    .page-error button {
+      margin-top: 8px;
+      padding: 10px 24px;
+      background: #1a1a1a;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+  </style>
 </head>
 <body>
 
-    <h1>Gestion des matériels</h1>
+  <!-- All pages are injected here by app.js -->
+  <div id="app"></div>
 
-    <a href="login.html">
-        <button>Connexion</button>
-    </a>
+  <script src="app.js"></script>
 
 </body>
 </html>
