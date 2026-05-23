@@ -33,7 +33,7 @@
       </table>
       <p>Veuillez vérifier l'état du matériel et prendre les mesures nécessaires.</p>
     </div>
-    <div class="footer">EduPlatform — Notification automatique</div>
+    <div class="footer">GestMat — Notification automatique</div>
   </div>
 </body>
 </html>

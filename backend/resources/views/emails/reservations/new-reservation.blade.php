@@ -33,7 +33,7 @@
   <div class="wrapper">
 
     <div class="header">
-      <h1>🎓 EduPlatform</h1>
+      <h1>🎓 GestMat</h1>
       <p>Système de gestion des réservations</p>
       <span class="badge">Nouvelle demande</span>
     </div>
@@ -96,7 +96,7 @@
     </div>
 
     <div class="footer">
-      <p>Cet email a été envoyé automatiquement par EduPlatform.<br/>
+      <p>Cet email a été envoyé automatiquement par GestMat.<br/>
       Ne pas répondre directement à cet email.</p>
     </div>
 

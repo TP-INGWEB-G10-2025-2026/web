@@ -13,7 +13,7 @@ use Illuminate\Validation\ValidationException;
 class TeacherService
 {
 
-
+    public function __construct(private readonly TwilioService $twilioService) {}
     public function list(array $filters): LengthAwarePaginator
     {
         return User::query()
@@ -43,15 +43,15 @@ class TeacherService
         ]);
 
         // Send welcome email via SendGrid
-        // Mail::to($teacher->email)->queue(new WelcomeTeacherMail($teacher, $plain));
+        Mail::to($teacher->email)->queue(new WelcomeTeacherMail($teacher, $plain));
 
         // Send welcome SMS via Twilio (only if phone provided)
-        // if ($teacher->phone) {
-        //     $this->twilioService->sendSms(
-        //         to     : $teacher->phone,
-        //         message: "Bienvenue {$teacher->name} ! Votre compte a été créé. Email: {$teacher->email} | Mot de passe: {$plain}",
-        //     );
-        // }
+        if ($teacher->phone) {
+            $this->twilioService->sendSms(
+                to: $teacher->phone,
+                message: "Bienvenue {$teacher->name} ! Votre compte a été créé. Email: {$teacher->email} | Mot de passe: {$plain}",
+            );
+        }
 
         return $teacher;
     }
@@ -78,12 +78,12 @@ class TeacherService
         $this->guardAdmin($teacher);
         $teacher->update(['is_blocked' => true]);
 
-        // if ($teacher->phone) {
-        //     $this->twilioService->sendSms(
-        //         to     : $teacher->phone,
-        //         message: "Votre compte a été bloqué. Contactez un administrateur.",
-        //     );
-        // }
+        if ($teacher->phone) {
+            $this->twilioService->sendSms(
+                to     : $teacher->phone,
+                message: "Votre compte a été bloqué. Contactez un administrateur.",
+            );
+        }
 
         return $teacher->fresh();
     }
@@ -93,12 +93,12 @@ class TeacherService
         $this->guardAdmin($teacher);
         $teacher->update(['is_blocked' => false]);
 
-        // if ($teacher->phone) {
-        //     $this->twilioService->sendSms(
-        //         to     : $teacher->phone,
-        //         message: "Votre compte a été débloqué. Vous pouvez vous connecter.",
-        //     );
-        // }
+        if ($teacher->phone) {
+            $this->twilioService->sendSms(
+                to     : $teacher->phone,
+                message: "Votre compte a été débloqué. Vous pouvez vous connecter.",
+            );
+        }
 
         return $teacher->fresh();
     }

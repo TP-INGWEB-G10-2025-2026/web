@@ -17,14 +17,15 @@ use Illuminate\Support\ServiceProvider;
 class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
-    {
-        $this->app->singleton(TwilioService::class, fn() => new TwilioService(
-            sid: config('services.twilio.sid',   ''),
+{
+    $this->app->singleton(TwilioService::class, function () {
+        return new TwilioService(
+            sid:   config('services.twilio.sid',   ''),
             token: config('services.twilio.token', ''),
-            from: config('services.twilio.from',  ''),
-        ));
-    }
-
+            from:  config('services.twilio.from',  ''),
+        );
+    });
+}
     public function boot(): void
     {
 

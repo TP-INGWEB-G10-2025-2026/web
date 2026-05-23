@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Enums\MaterialStatus;
+
 use App\Enums\ReservationStatus;
-use App\Role;
+use App\Enums\Role;
 use App\Models\Category;
 use App\Models\Loan;
 use App\Models\Material;
@@ -90,6 +90,6 @@ class LoanSeeder extends Seeder
                 ->create();
         }
 
-       
+
     }
 }
