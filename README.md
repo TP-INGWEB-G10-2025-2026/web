@@ -221,8 +221,7 @@ php artisan test
 # Lancer un fichier de tests spécifique
 php artisan test tests/Feature/AuthTest.php --verbose
 
-# Lancer avec rapport de couverture
-php artisan test --coverage
+
 ```
 
 ### Suites de tests disponibles
