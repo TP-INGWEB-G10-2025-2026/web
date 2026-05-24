@@ -53,16 +53,17 @@ class ReservationService
         return $reservation;
     }
 
-    public function validate(Reservation $reservation, string $materialId): Reservation
-    {
-        // Must be pending
-        if (! $reservation->isPending()) {
-            throw ValidationException::withMessages([
-                'reservation' => ['Seules les réservations en attente peuvent être validées.'],
-            ]);
-        }
+    public function validate(Reservation $reservation, ?string $materialId): Reservation
+{
+    if (! $reservation->isPending()) {
+        throw ValidationException::withMessages([
+            'reservation' => ['Seules les réservations en attente peuvent être validées.'],
+        ]);
+    }
 
-        // Check material exists and is available
+    $updateData = ['status' => ReservationStatus::Validated];
+
+    if ($materialId !== null) {
         $material = Material::findOrFail($materialId);
 
         if ($material->status !== MaterialStatus::Available) {
@@ -71,7 +72,6 @@ class ReservationService
             ]);
         }
 
-        // Check no date conflict
         if ($this->availabilityService->hasConflict(
             $materialId,
             $reservation->start_date->format('Y-m-d'),
@@ -83,20 +83,16 @@ class ReservationService
             ]);
         }
 
-        // Update reservation
-        $reservation->update([
-            'material_id' => $materialId,
-            'status'      => ReservationStatus::Validated,
-        ]);
-
-        // Update material status to in_use
+        $updateData['material_id'] = $materialId;
         $material->update(['status' => MaterialStatus::InUse]);
-
-        $reservation->load(['user', 'material.category']);
-        event(new ReservationValidated($reservation));
-
-        return $reservation->fresh(['user', 'material.category']);
     }
+
+    $reservation->update($updateData);
+    $reservation->load(['user', 'material.category']);
+    event(new ReservationValidated($reservation));
+
+    return $reservation->fresh(['user', 'material.category']);
+}
 
     public function reject(Reservation $reservation, ?string $reason): Reservation
     {

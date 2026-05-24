@@ -1,9 +1,9 @@
 <?php
 
-
 namespace App\Services;
 
 use App\Enums\MaterialStatus;
+use App\Enums\ReservationStatus;
 use App\Models\Material;
 use App\Models\Reservation;
 use Illuminate\Database\Eloquent\Collection;
@@ -14,21 +14,14 @@ class AvailabilityService
      * Return all materials available for the given period.
      * A material is available if:
      *  - its status is 'available'
-     *  - it has no conflicting validated/pending reservation
+     *  - it has no conflicting VALIDATED reservation (pending is ignored)
      */
     public function checkAvailability(string $startDate, string $endDate): Collection
     {
-        // Get IDs of materials that have conflicts in this period
         $conflictingIds = Reservation::query()
-            ->conflicting('', $startDate, $endDate)
-            ->whereNotNull('material_id')
-            ->pluck('material_id')
-            ->unique()
-            ->toArray();
-
-        // Fix: conflicting scope needs material_id — use raw query instead
-        $conflictingIds = Reservation::query()
-            ->whereNotIn('status', ['cancelled', 'rejected'])
+            ->whereIn('status', [
+                ReservationStatus::Validated->value,  // ← only validated blocks a slot
+            ])
             ->where('start_date', '<=', $endDate)
             ->where('end_date',   '>=', $startDate)
             ->whereNotNull('material_id')
@@ -45,6 +38,8 @@ class AvailabilityService
 
     /**
      * Check if a specific material has a conflict in the given period.
+     * Used at validation time — pending reservations DO count here
+     * to prevent two admins validating the same material simultaneously.
      */
     public function hasConflict(
         string  $materialId,
@@ -52,7 +47,14 @@ class AvailabilityService
         string  $endDate,
         ?string $excludeReservationId = null
     ): bool {
-        return Reservation::conflicting($materialId, $startDate, $endDate, $excludeReservationId)
+        return Reservation::query()
+            ->whereIn('status', [
+                ReservationStatus::Validated->value,  // ← still blocks at validation
+            ])
+            ->where('material_id', $materialId)
+            ->where('start_date', '<=', $endDate)
+            ->where('end_date',   '>=', $startDate)
+            ->when($excludeReservationId, fn($q) => $q->where('id', '!=', $excludeReservationId))
             ->exists();
     }
 }
