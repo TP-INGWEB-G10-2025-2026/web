@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mes réservations — GestMat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--ink:#0f0e0c;--paper:#f5f0e8;--cream:#ede8dc;--accent:#c84b2f;--gold:#b8922a;--muted:#8a8278;--border:#d4cfc5;--success:#2d9c6e;--warn:#d97706;--info:#2563eb}
+    body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
+    nav{background:var(--ink);padding:0 48px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .nav-brand{font-family:'Playfair Display',serif;color:var(--paper);font-size:18px;display:flex;align-items:center;gap:10px;text-decoration:none}
+    .nav-links a{color:#a09890;text-decoration:none;font-size:14px;margin-left:24px;transition:color .2s}
+    .nav-links a:hover,.nav-links a.active{color:var(--paper)}
+    .nav-user{display:flex;align-items:center;gap:10px;color:#a09890;font-size:13px}
+    .avatar-sm{width:32px;height:32px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:600}
+    .btn-logout{background:none;border:1px solid #3a3830;color:#a09890;padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer;transition:all .2s}
+    .btn-logout:hover{border-color:var(--accent);color:var(--accent)}
+    .toast{position:fixed;bottom:32px;right:32px;background:var(--ink);color:var(--paper);padding:14px 20px;border-radius:10px;font-size:14px;box-shadow:0 8px 32px rgba(0,0,0,.2);transform:translateY(100px);opacity:0;transition:all .3s ease;z-index:9999;max-width:320px}
+    .toast.show{transform:translateY(0);opacity:1}
+    .toast.success{border-left:3px solid var(--success)}
+    .toast.error{border-left:3px solid var(--accent)}
+
+    .page{max-width:1100px;margin:0 auto;padding:40px 24px}
+    .page-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;animation:fadeUp .4s ease}
+    .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--accent);margin-bottom:6px}
+    .page-header h1{font-family:'Playfair Display',serif;font-size:32px}
+    .page-header p{color:var(--muted);font-size:14px;margin-top:4px}
+
+    /* TABS */
+    .tabs{display:flex;gap:4px;background:white;border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:24px;width:fit-content;animation:fadeUp .4s .1s ease both}
+    .tab{padding:8px 20px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;border:none;background:none;color:var(--muted)}
+    .tab.active{background:var(--ink);color:white}
+    .tab:hover:not(.active){background:var(--cream);color:var(--ink)}
+
+    /* TABLE */
+    .table-wrap{background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden;animation:fadeUp .4s .15s ease both}
+    table{width:100%;border-collapse:collapse}
+    thead{background:var(--cream)}
+    th{padding:12px 16px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:500}
+    td{padding:14px 16px;font-size:14px;border-top:1px solid var(--border);vertical-align:middle}
+    tr.pending-row{border-left:3px solid var(--warn)}
+    tr:hover td{background:#faf8f4}
+
+    /* BADGES */
+    .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+    .badge-pending{background:#fffbeb;color:var(--warn)}
+    .badge-validated{background:#edfaf3;color:var(--success)}
+    .badge-rejected{background:#fef2f0;color:var(--accent)}
+    .badge-cancelled{background:#f3f4f6;color:#6b7280}
+
+    /* PERIOD DISPLAY */
+    .period{font-weight:500}
+    .period-sub{font-size:12px;color:var(--muted);margin-top:2px}
+
+    /* REJECTION TOOLTIP */
+    .rejection-wrap{position:relative;display:inline-block}
+    .rejection-icon{cursor:help;color:var(--accent)}
+    .rejection-tip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--ink);color:white;padding:8px 12px;border-radius:8px;font-size:12px;width:220px;line-height:1.5;white-space:normal;display:none;z-index:10}
+    .rejection-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--ink)}
+    .rejection-wrap:hover .rejection-tip{display:block}
+
+    /* PAGINATION */
+    .pagination{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-top:1px solid var(--border)}
+    .pg-info{font-size:13px;color:var(--muted)}
+    .pg-btns{display:flex;gap:6px}
+    .pg-btn{width:32px;height:32px;border-radius:7px;border:1px solid var(--border);background:none;cursor:pointer;font-size:13px;transition:all .15s;display:flex;align-items:center;justify-content:center}
+    .pg-btn:hover:not(:disabled){border-color:var(--ink);background:var(--cream)}
+    .pg-btn.active{background:var(--ink);color:white;border-color:var(--ink)}
+    .pg-btn:disabled{opacity:.3;cursor:not-allowed}
+
+    .btn{padding:10px 20px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;border:none;display:inline-flex;align-items:center;gap:8px}
+    .btn-primary{background:var(--ink);color:var(--paper)}
+    .btn-primary:hover{background:#1e1c18;transform:translateY(-1px)}
+    .empty{text-align:center;padding:60px 24px;color:var(--muted)}
+    .empty .icon{font-size:40px;margin-bottom:12px;opacity:.4}
+    .skeleton{background:linear-gradient(90deg,var(--cream) 25%,var(--border) 50%,var(--cream) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:4px;height:14px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="#"><span>🎓</span> GestMat</a>
+  <div class="nav-links">
+    <a href="my-reservations.html" class="active">Mes réservations</a>
+    <a href="new-reservation.html">Nouvelle demande</a>
+    <a href="../../profile.htmll">Mon profil</a>
+  </div>
+  <div class="nav-user">
+    <div class="avatar-sm" id="navAvatar">T</div>
+    <span id="navName">Enseignant</span>
+    <button class="btn-logout" onclick="logout()">Déconnexion</button>
+  </div>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">Enseignant</div>
+      <h1>Mes réservations</h1>
+      <p>Suivez l'état de toutes vos demandes.</p>
+    </div>
+    <button class="btn btn-primary" onclick="location.href='new-reservation.html'">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nouvelle demande
+    </button>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="setTab('')">Toutes</button>
+    <button class="tab" onclick="setTab('pending')">⏳ En attente</button>
+    <button class="tab" onclick="setTab('validated')">✅ Validées</button>
+    <button class="tab" onclick="setTab('rejected')">❌ Rejetées</button>
+    <button class="tab" onclick="setTab('cancelled')">🚫 Annulées</button>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Période demandée</th>
+          <th>Matériel attribué</th>
+          <th>Statut</th>
+          <th>Soumise le</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="4"><div class="skeleton" style="margin:20px 0"></div></td></tr>
+      </tbody>
+    </table>
+    <div class="pagination" id="pagination" style="display:none">
+      <span class="pg-info" id="pgInfo"></span>
+      <div class="pg-btns" id="pgBtns"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API   = 'http://localhost:8000/api/v1';
+const token = localStorage.getItem('token');
+if(!token) location.href='../../login.html';
+const user = JSON.parse(localStorage.getItem('user')||'{}');
+document.getElementById('navAvatar').textContent=(user.name||'T').slice(0,2).toUpperCase();
+document.getElementById('navName').textContent=user.name||'Enseignant';
+
+let currentTab='', currentPage=1;
+
+function H(){return{'Content-Type':'application/json','Accept':'application/json','Authorization':`Bearer ${token}`}}
+
+const BADGE={pending:'badge-pending',validated:'badge-validated',rejected:'badge-rejected',cancelled:'badge-cancelled'};
+const LABEL={pending:'⏳ En attente',validated:'✅ Validée',rejected:'❌ Rejetée',cancelled:'🚫 Annulée'};
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function fmt(d){return d?new Date(d+'T00:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}):'—'}
+function fmtDT(d){return d?new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}):'—'}
+
+function setTab(status){
+  currentTab=status; currentPage=1;
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active',
+      (status===''&&i===0)||(status==='pending'&&i===1)||(status==='validated'&&i===2)||(status==='rejected'&&i===3)||(status==='cancelled'&&i===4)
+    );
+  });
+  load();
+}
+
+async function load(){
+  const tbody=document.getElementById('tbody');
+  tbody.innerHTML=`<tr><td colspan="4"><div class="skeleton" style="margin:20px 0"></div></td></tr>`;
+  const params=new URLSearchParams({page:currentPage});
+  if(currentTab) params.set('status',currentTab);
+
+  try{
+    const r=await fetch(`${API}/reservations?${params}`,{headers:H()});
+    if(r.status===401){logout();return}
+    const d=await r.json();
+    renderTable(d.data||[]);
+    renderPagination(d.meta||{});
+  }catch(e){
+    tbody.innerHTML=`<tr><td colspan="4" style="text-align:center;color:var(--accent);padding:24px">Erreur de chargement.</td></tr>`;
+  }
+}
+
+function renderTable(items){
+  const tbody=document.getElementById('tbody');
+  if(!items.length){
+    tbody.innerHTML=`<tr><td colspan="4"><div class="empty"><div class="icon">📋</div><p>Aucune réservation ${currentTab?'avec ce statut':''} pour le moment.</p></div></td></tr>`;
+    document.getElementById('pagination').style.display='none';
+    return;
+  }
+  tbody.innerHTML=items.map(r=>`
+    <tr class="${r.status==='pending'?'pending-row':''}">
+      <td>
+        <div class="period">${fmt(r.start_date)} → ${fmt(r.end_date)}</div>
+        <div class="period-sub">${diffLabel(r.start_date,r.end_date)}</div>
+      </td>
+      <td>${r.material?`📦 ${esc(r.material.name)}`:`<span style="color:var(--muted);font-size:12px">En attente d'assignation</span>`}</td>
+      <td>
+        <span class="badge ${BADGE[r.status]||''}">${LABEL[r.status]||r.status}</span>
+        ${r.status==='rejected'&&r.rejection_reason?`
+          <div class="rejection-wrap">
+            <span class="rejection-icon" title="Voir la raison">ℹ️</span>
+            <div class="rejection-tip">${esc(r.rejection_reason)}</div>
+          </div>
+        `:''}
+      </td>
+      <td>${fmtDT(r.created_at)}</td>
+    </tr>
+  `).join('');
+}
+
+function diffLabel(s,e){
+  if(!s||!e) return '';
+  const d=Math.ceil((new Date(e)-new Date(s+'T00:00:00'))/(1000*60*60*24));
+  return `${d} jour${d>1?'s':''}`;
+}
+
+function renderPagination(meta){
+  const pg=document.getElementById('pagination');
+  if(!meta.last_page||meta.last_page<=1){pg.style.display='none';return}
+  pg.style.display='flex';
+  document.getElementById('pgInfo').textContent=`Page ${meta.current_page} sur ${meta.last_page} — ${meta.total} réservations`;
+  const btns=document.getElementById('pgBtns');
+  btns.innerHTML=`
+    <button class="pg-btn" onclick="goPage(${meta.current_page-1})" ${meta.current_page===1?'disabled':''}>‹</button>
+    ${Array.from({length:meta.last_page},(_,i)=>i+1).map(p=>`<button class="pg-btn ${p===meta.current_page?'active':''}" onclick="goPage(${p})">${p}</button>`).join('')}
+    <button class="pg-btn" onclick="goPage(${meta.current_page+1})" ${meta.current_page===meta.last_page?'disabled':''}>›</button>
+  `;
+}
+
+function goPage(p){currentPage=p;load()}
+
+function logout(){
+  fetch(`${API}/auth/logout`,{method:'POST',headers:H()}).finally(()=>{
+    localStorage.removeItem('token');localStorage.removeItem('user');location.href='../../login.html';
+  });
+}
+
+load();
+</script>
+</body>
+</html>
