@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="fr"> 
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nouveau Prêt — GestMat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --ink:#0f0e0c;--paper:#f5f0e8;--cream:#ede8dc;--accent:#c84b2f;
+      --gold:#b8922a;--muted:#8a8278;--border:#d4cfc5;--success:#2d9c6e;
+      --warn:#d97706;--info:#2563eb;
+    }
+    body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
+
+    nav{background:var(--ink);padding:0 48px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .nav-brand{font-family:'Playfair Display',serif;color:var(--paper);font-size:18px;display:flex;align-items:center;gap:10px;text-decoration:none}
+    .nav-links a{color:#a09890;text-decoration:none;font-size:14px;margin-left:24px;transition:color .2s}
+    .nav-links a:hover,.nav-links a.active{color:var(--paper)}
+    .nav-user{display:flex;align-items:center;gap:10px;color:#a09890;font-size:13px}
+    .avatar-sm{width:32px;height:32px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:600}
+    .btn-logout{background:none;border:1px solid #3a3830;color:#a09890;padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer;transition:all .2s}
+    .btn-logout:hover{border-color:var(--accent);color:var(--accent)}
+
+    .toast{position:fixed;bottom:32px;right:32px;background:var(--ink);color:var(--paper);padding:14px 20px;border-radius:10px;font-size:14px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,.2);transform:translateY(100px);opacity:0;transition:all .3s ease;z-index:9999;max-width:320px}
+    .toast.show{transform:translateY(0);opacity:1}
+    .toast.success{border-left:3px solid var(--success)}
+    .toast.error{border-left:3px solid var(--accent)}
+
+    .page{max-width:900px;margin:0 auto;padding:40px 24px}
+    .page-header{margin-bottom:32px;animation:fadeUp .4s ease}
+    .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--accent);margin-bottom:6px}
+    .page-header h1{font-family:'Playfair Display',serif;font-size:32px}
+    .page-header p{color:var(--muted);font-size:14px;margin-top:4px}
+    .breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:20px}
+    .breadcrumb a{color:var(--muted);text-decoration:none}
+    .breadcrumb a:hover{color:var(--ink)}
+    .breadcrumb span{opacity:.4}
+
+    .layout{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start}
+
+    .card{background:white;border:1px solid var(--border);border-radius:12px;padding:28px;animation:fadeUp .4s ease both}
+    .card+.card{margin-top:16px}
+    .card-title{font-family:'Playfair Display',serif;font-size:18px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--cream)}
+
+    .field{margin-bottom:20px}
+    .field label{display:block;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px}
+    .field input,.field select,.field textarea{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);background:white;outline:none;transition:border-color .2s}
+    .field input:focus,.field select,.field textarea:focus{border-color:var(--accent)}
+    .field select:focus{border-color:var(--accent)}
+    .field textarea{resize:vertical;min-height:80px;line-height:1.5}
+    .field .hint{font-size:12px;color:var(--muted);margin-top:4px}
+    .field-error{font-size:12px;color:var(--accent);margin-top:4px;display:none}
+    .field.has-error input,.field.has-error select{border-color:var(--accent)}
+    .field.has-error .field-error{display:block}
+
+    .search-wrap{position:relative}
+    .search-wrap input{padding-right:36px}
+    .search-wrap .search-ico{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none}
+    .dropdown{position:absolute;top:100%;left:0;right:0;background:white;border:1.5px solid var(--border);border-top:none;border-radius:0 0 8px 8px;max-height:200px;overflow-y:auto;z-index:50;display:none}
+    .dropdown.show{display:block}
+    .dropdown-item{padding:10px 14px;font-size:14px;cursor:pointer;border-bottom:1px solid var(--cream);transition:background .15s}
+    .dropdown-item:last-child{border-bottom:none}
+    .dropdown-item:hover,.dropdown-item.active{background:var(--cream)}
+    .dropdown-item .sub{font-size:12px;color:var(--muted);margin-top:2px}
+    .dropdown-empty{padding:12px 14px;font-size:14px;color:var(--muted);text-align:center}
+    .selected-tag{display:inline-flex;align-items:center;gap:8px;background:var(--cream);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:13px;margin-top:8px}
+    .selected-tag button{background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;line-height:1;padding:0}
+    .selected-tag button:hover{color:var(--accent)}
+
+    .two-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+    /* Summary card */
+    .summary{background:var(--ink);color:var(--paper);border-radius:12px;padding:24px;animation:fadeUp .4s .1s ease both;position:sticky;top:80px}
+    .summary-title{font-family:'Playfair Display',serif;font-size:18px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #2a2820}
+    .summary-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;font-size:14px}
+    .summary-row .lbl{color:#706860;flex-shrink:0;margin-right:12px}
+    .summary-row .val{text-align:right;font-weight:500;word-break:break-word;max-width:180px}
+    .summary-divider{border:none;border-top:1px solid #2a2820;margin:16px 0}
+    .summary-empty{color:#706860;font-size:13px;text-align:center;padding:20px 0}
+
+    .btn{padding:10px 20px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;border:none}
+    .btn-primary{background:var(--accent);color:white;width:100%;justify-content:center;display:flex;align-items:center;gap:8px;margin-top:20px}
+    .btn-primary:hover:not(:disabled){background:#a83a22;transform:translateY(-1px)}
+    .btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+    .btn-ghost{background:none;border:1.5px solid #3a3830;color:#a09890;width:100%;justify-content:center;display:flex;align-items:center;gap:8px;margin-top:10px}
+    .btn-ghost:hover{border-color:var(--paper);color:var(--paper)}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  </style>
+</head>
+<body>
+
+
+<nav>
+  <a class="nav-brand" href="#"><span>🎓</span> GestMat</a>
+  <div class="nav-links">
+     <a href="../index.html" >Dashboard</a>
+    <a href="index.html" class="active">Prêts</a>
+    <a href="../reservations/index.html" >Reservation</a>
+    <a href="../materials/index.html">Matériels</a>
+    <a href="../teachers/index.html">Enseignants</a>
+    <a href="../profile/index.html">Mon Profile</a>
+   
+  </div>
+  <div class="nav-user">
+    <div class="avatar-sm" id="navAvatar">A</div>
+    <span id="navName">Admin</span>
+    <button class="btn-logout" onclick="logout()">Déconnexion</button>
+  </div>
+</nav>
+<div class="toast" id="toast"></div>
+
+<div class="page">
+  <div class="breadcrumb">
+    <a href="index.html">Prêts</a>
+    <span>›</span>
+    <span>Nouveau prêt</span>
+  </div>
+  <div class="page-header">
+    <div class="eyebrow">Gestion des prêts</div>
+    <h1>Enregistrer un prêt</h1>
+    <p>Associez un matériel disponible à un enseignant pour une période définie.</p>
+  </div>
+
+  <div class="layout">
+    <div>
+      <!-- Teacher -->
+      <div class="card">
+        <div class="card-title">👤 Enseignant</div>
+        <div class="field" id="fieldTeacher">
+          <label>Sélectionner un enseignant *</label>
+          <div class="search-wrap">
+            <input type="text" id="teacherSearch" placeholder="Rechercher par nom ou email…" oninput="searchTeacher()" autocomplete="off"/>
+            <span class="search-ico">🔍</span>
+          </div>
+          <div class="dropdown" id="teacherDropdown"></div>
+          <div id="teacherTag" style="display:none"></div>
+          <div class="field-error" id="teacherError">Veuillez sélectionner un enseignant.</div>
+        </div>
+      </div>
+
+      <!-- Material -->
+      <div class="card">
+        <div class="card-title">📦 Matériel</div>
+        <div class="field" id="fieldMaterial">
+          <label>Sélectionner un matériel disponible *</label>
+          <div class="search-wrap">
+            <input type="text" id="materialSearch" placeholder="Rechercher un matériel…" oninput="searchMaterial()" autocomplete="off"/>
+            <span class="search-ico">🔍</span>
+          </div>
+          <div class="dropdown" id="materialDropdown"></div>
+          <div id="materialTag" style="display:none"></div>
+          <div class="field-error" id="materialError">Veuillez sélectionner un matériel disponible.</div>
+        </div>
+      </div>
+
+      <!-- Dates -->
+      <div class="card">
+        <div class="card-title">📅 Période de prêt</div>
+        <div class="two-cols">
+          <div class="field" id="fieldLoanDate">
+            <label>Date de prêt *</label>
+            <input type="date" id="loanDate" onchange="updateSummary()"/>
+            <div class="field-error" id="loanDateError">Date de prêt requise.</div>
+          </div>
+          <div class="field" id="fieldReturnDate">
+            <label>Date de retour prévue *</label>
+            <input type="date" id="returnDate" onchange="updateSummary()"/>
+            <div class="field-error" id="returnDateError">La date de retour doit être après la date de prêt.</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Notes (optionnel)</label>
+          <textarea id="notes" placeholder="Remarques particulières…" oninput="updateSummary()"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary">
+      <div class="summary-title">📋 Récapitulatif</div>
+      <div id="summaryContent">
+        <div class="summary-empty">Remplissez le formulaire pour voir le résumé.</div>
+      </div>
+      <button class="btn btn-primary" id="btnSubmit" onclick="submit()" disabled>
+        ✓ Enregistrer le prêt
+      </button>
+      <button class="btn btn-ghost" onclick="location.href='index.html'">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:8000/api/v1';
+const token = localStorage.getItem('token');
+if (!token) location.href = '../../login.html';
+const user = JSON.parse(localStorage.getItem('user')||'{}');
+if (user.role !== 'admin') location.href = '../profile/index.html';
+document.getElementById('navAvatar').textContent = (user.name||'A').slice(0,2).toUpperCase();
+document.getElementById('navName').textContent = user.name||'Admin';
+
+function H(){ return {'Content-Type':'application/json','Accept':'application/json','Authorization':`Bearer ${token}`} }
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.innerHTML=(type==='success'?'✓ ':'✗ ')+msg;
+  t.className=`toast ${type} show`;
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+let selectedTeacher = null, selectedMaterial = null;
+let teacherTimer = null, materialTimer = null;
+let allMaterials = [];
+
+// Set default loan date to today
+document.getElementById('loanDate').value = new Date().toISOString().split('T')[0];
+
+async function searchTeacher(){
+  const q = document.getElementById('teacherSearch').value.trim();
+  clearTimeout(teacherTimer);
+  if(q.length < 2){ document.getElementById('teacherDropdown').classList.remove('show'); return; }
+  teacherTimer = setTimeout(async ()=>{
+    try{
+      const r = await fetch(`${API}/teachers?name=${encodeURIComponent(q)}&per_page=8`,{headers:H()});
+      const d = await r.json();
+      renderTeacherDropdown(d.data||[]);
+    }catch(e){}
+  }, 300);
+}
+
+function renderTeacherDropdown(items){
+  const dd = document.getElementById('teacherDropdown');
+  if(!items.length){ dd.innerHTML=`<div class="dropdown-empty">Aucun enseignant trouvé.</div>`; dd.classList.add('show'); return; }
+  dd.innerHTML = items.map(t=>`
+    <div class="dropdown-item" onclick="selectTeacher(${JSON.stringify(t).replace(/"/g,'&quot;')})">
+      <div>${esc(t.name)}</div>
+      <div class="sub">${esc(t.email||'')}</div>
+    </div>
+  `).join('');
+  dd.classList.add('show');
+}
+
+function selectTeacher(t){
+  selectedTeacher = t;
+  document.getElementById('teacherSearch').style.display = 'none';
+  document.getElementById('teacherDropdown').classList.remove('show');
+  const tag = document.getElementById('teacherTag');
+  tag.style.display = 'block';
+  tag.innerHTML = `<div class="selected-tag">👤 ${esc(t.name)} — ${esc(t.email||'')} <button onclick="clearTeacher()">×</button></div>`;
+  document.getElementById('fieldTeacher').classList.remove('has-error');
+  updateSummary();
+}
+
+function clearTeacher(){
+  selectedTeacher = null;
+  document.getElementById('teacherSearch').style.display = '';
+  document.getElementById('teacherSearch').value = '';
+  document.getElementById('teacherTag').style.display = 'none';
+  updateSummary();
+}
+
+async function searchMaterial(){
+  const q = document.getElementById('materialSearch').value.trim();
+  clearTimeout(materialTimer);
+  materialTimer = setTimeout(async ()=>{
+    try{
+      const params = new URLSearchParams({status:'available',per_page:20});
+      if(q) params.set('name',q);
+      const r = await fetch(`${API}/materials?${params}`,{headers:H()});
+      const d = await r.json();
+      renderMaterialDropdown(d.data||[]);
+    }catch(e){}
+  }, 300);
+}
+
+function renderMaterialDropdown(items){
+  const dd = document.getElementById('materialDropdown');
+  if(!items.length){ dd.innerHTML=`<div class="dropdown-empty">Aucun matériel disponible.</div>`; dd.classList.add('show'); return; }
+  dd.innerHTML = items.map(m=>`
+    <div class="dropdown-item" onclick="selectMaterial(${JSON.stringify(m).replace(/"/g,'&quot;')})">
+      <div>${esc(m.name)}</div>
+      <div class="sub">${esc(m.category?.name||'')}</div>
+    </div>
+  `).join('');
+  dd.classList.add('show');
+}
+
+function selectMaterial(m){
+  selectedMaterial = m;
+  document.getElementById('materialSearch').style.display = 'none';
+  document.getElementById('materialDropdown').classList.remove('show');
+  const tag = document.getElementById('materialTag');
+  tag.style.display = 'block';
+  tag.innerHTML = `<div class="selected-tag">📦 ${esc(m.name)} ${m.category?'— '+esc(m.category.name):''} <button onclick="clearMaterial()">×</button></div>`;
+  document.getElementById('fieldMaterial').classList.remove('has-error');
+  updateSummary();
+}
+
+function clearMaterial(){
+  selectedMaterial = null;
+  document.getElementById('materialSearch').style.display = '';
+  document.getElementById('materialSearch').value = '';
+  document.getElementById('materialTag').style.display = 'none';
+  updateSummary();
+}
+
+function updateSummary(){
+  const loanDate = document.getElementById('loanDate').value;
+  const returnDate = document.getElementById('returnDate').value;
+  const notes = document.getElementById('notes').value.trim();
+  const ok = selectedTeacher && selectedMaterial && loanDate && returnDate && returnDate > loanDate;
+  document.getElementById('btnSubmit').disabled = !ok;
+
+  const html = [];
+  html.push(`<div class="summary-row"><span class="lbl">Enseignant</span><span class="val">${selectedTeacher ? esc(selectedTeacher.name) : '<span style="color:#706860">Non sélectionné</span>'}</span></div>`);
+  html.push(`<div class="summary-row"><span class="lbl">Matériel</span><span class="val">${selectedMaterial ? esc(selectedMaterial.name) : '<span style="color:#706860">Non sélectionné</span>'}</span></div>`);
+  html.push(`<hr class="summary-divider">`);
+  html.push(`<div class="summary-row"><span class="lbl">Prêt le</span><span class="val">${loanDate ? fmtDate(loanDate) : '<span style="color:#706860">—</span>'}</span></div>`);
+  html.push(`<div class="summary-row"><span class="lbl">Retour prévu</span><span class="val">${returnDate ? fmtDate(returnDate) : '<span style="color:#706860">—</span>'}</span></div>`);
+  if(loanDate && returnDate && returnDate > loanDate){
+    const days = Math.ceil((new Date(returnDate)-new Date(loanDate))/(1000*60*60*24));
+    html.push(`<div class="summary-row"><span class="lbl">Durée</span><span class="val">${days} jour${days>1?'s':''}</span></div>`);
+  }
+  if(notes) html.push(`<hr class="summary-divider"><div class="summary-row"><span class="lbl">Notes</span><span class="val" style="font-size:12px;color:#a09890">${esc(notes)}</span></div>`);
+  document.getElementById('summaryContent').innerHTML = html.join('');
+}
+
+function validate(){
+  let ok = true;
+  if(!selectedTeacher){ document.getElementById('fieldTeacher').classList.add('has-error'); ok=false; } else document.getElementById('fieldTeacher').classList.remove('has-error');
+  if(!selectedMaterial){ document.getElementById('fieldMaterial').classList.add('has-error'); ok=false; } else document.getElementById('fieldMaterial').classList.remove('has-error');
+  const ld = document.getElementById('loanDate').value;
+  const rd = document.getElementById('returnDate').value;
+  if(!ld){ document.getElementById('fieldLoanDate').classList.add('has-error'); ok=false; } else document.getElementById('fieldLoanDate').classList.remove('has-error');
+  if(!rd||rd<=ld){ document.getElementById('fieldReturnDate').classList.add('has-error'); ok=false; } else document.getElementById('fieldReturnDate').classList.remove('has-error');
+  return ok;
+}
+
+async function submit(){
+  if(!validate()) return;
+  const btn = document.getElementById('btnSubmit');
+  btn.disabled = true; btn.textContent = 'Enregistrement…';
+  try{
+    const r = await fetch(`${API}/loans`,{method:'POST',headers:H(),body:JSON.stringify({
+      user_id: selectedTeacher.id,
+      material_id: selectedMaterial.id,
+      loan_date: document.getElementById('loanDate').value,
+      expected_return_date: document.getElementById('returnDate').value,
+      notes: document.getElementById('notes').value.trim()||null
+    })});
+    const d = await r.json();
+    if(!r.ok){
+      if(r.status===422 && d.errors){
+        const msgs = Object.values(d.errors).flat().join(' ');
+        showToast(msgs,'error');
+      } else showToast(d.message||'Erreur lors de l\'enregistrement.','error');
+      return;
+    }
+    showToast('Prêt enregistré avec succès !');
+    setTimeout(()=>location.href='index.html',1200);
+  }catch(e){ showToast('Erreur réseau.','error'); }
+  finally{ btn.disabled=false; btn.innerHTML='✓ Enregistrer le prêt'; }
+}
+
+function fmtDate(s){ return s?new Date(s).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'}):'—' }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+function logout(){
+  fetch(`${API}/auth/logout`,{method:'POST',headers:H()}).finally(()=>{
+    localStorage.removeItem('token');localStorage.removeItem('user');location.href='../../login.html';
+  });
+}
+
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#teacherSearch') && !e.target.closest('#teacherDropdown')) document.getElementById('teacherDropdown').classList.remove('show');
+  if(!e.target.closest('#materialSearch') && !e.target.closest('#materialDropdown')) document.getElementById('materialDropdown').classList.remove('show');
+});
+
+// Load materials on material search focus
+document.getElementById('materialSearch').addEventListener('focus', ()=>searchMaterial());
+updateSummary();
+</script>
+</body>
+</html>

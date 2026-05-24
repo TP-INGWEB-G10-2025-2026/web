@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Matériel — GestMat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--ink:#0f0e0c;--paper:#f5f0e8;--cream:#ede8dc;--accent:#c84b2f;--gold:#b8922a;--muted:#8a8278;--border:#d4cfc5;--success:#2d9c6e}
+    body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
+    nav{background:var(--ink);padding:0 48px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .nav-brand{font-family:'Playfair Display',serif;color:var(--paper);font-size:18px;display:flex;align-items:center;gap:10px;text-decoration:none}
+    .nav-links a{color:#a09890;text-decoration:none;font-size:14px;margin-left:24px;transition:color .2s}
+    .nav-links a:hover{color:var(--paper)}
+    .nav-user{display:flex;align-items:center;gap:10px;color:#a09890;font-size:13px}
+    .avatar-sm{width:32px;height:32px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:600}
+    .btn-logout{background:none;border:1px solid #3a3830;color:#a09890;padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer;transition:all .2s}
+    .btn-logout:hover{border-color:var(--accent);color:var(--accent)}
+
+    /* OVERLAY — quick category modal */
+    .overlay{position:fixed;inset:0;background:rgba(15,14,12,.6);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;padding:24px}
+    .overlay.show{display:flex}
+    .modal{background:white;border-radius:16px;width:100%;max-width:420px;padding:32px;animation:popIn .3s ease}
+    @keyframes popIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+    .modal-header h3{font-family:'Playfair Display',serif;font-size:20px}
+    .modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)}
+    .modal-close:hover{color:var(--ink)}
+    .modal-footer{display:flex;gap:12px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:32px;right:32px;background:var(--ink);color:var(--paper);padding:14px 20px;border-radius:10px;font-size:14px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,.2);transform:translateY(100px);opacity:0;transition:all .3s ease;z-index:9999}
+    .toast.show{transform:translateY(0);opacity:1}
+    .toast.success{border-left:3px solid var(--success)}
+    .toast.error{border-left:3px solid var(--accent)}
+
+    .page{max-width:760px;margin:0 auto;padding:48px 24px}
+
+    /* BREADCRUMB */
+    .breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:32px;animation:fadeUp .4s ease}
+    .breadcrumb a{color:var(--muted);text-decoration:none;transition:color .2s}
+    .breadcrumb a:hover{color:var(--ink)}
+    .breadcrumb span{color:var(--ink);font-weight:500}
+
+    .form-card{background:white;border:1px solid var(--border);border-radius:16px;padding:40px;animation:fadeUp .4s .1s ease both}
+
+    .form-header{margin-bottom:32px;padding-bottom:24px;border-bottom:1px solid var(--border)}
+    .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--accent);margin-bottom:6px}
+    .form-header h1{font-family:'Playfair Display',serif;font-size:28px}
+    .form-header p{color:var(--muted);font-size:14px;margin-top:4px}
+
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    @media(max-width:600px){.grid-2{grid-template-columns:1fr}}
+
+    .field{margin-bottom:20px}
+    label{display:block;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:7px}
+    .input-wrap{position:relative}
+    .input-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--muted);pointer-events:none}
+    input[type=text],input[type=email],select,textarea{width:100%;padding:11px 12px 11px 36px;background:var(--cream);border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s;appearance:none}
+    input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(200,75,47,.1);background:#fff}
+    input.invalid,select.invalid,textarea.invalid{border-color:var(--accent)}
+    textarea{resize:vertical;min-height:100px;padding-top:11px}
+    .field-error{color:var(--accent);font-size:12px;margin-top:4px;display:none}
+    .field-error.show{display:block}
+    .hint{font-size:12px;color:var(--muted);margin-top:5px}
+
+    /* Category select row */
+    .cat-row{display:flex;gap:8px;align-items:flex-end}
+    .cat-row .input-wrap{flex:1}
+    .btn-new-cat{padding:11px 14px;background:var(--cream);border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0}
+    .btn-new-cat:hover{border-color:var(--accent);color:var(--accent)}
+
+    .form-footer{display:flex;gap:12px;justify-content:flex-end;margin-top:32px;padding-top:24px;border-top:1px solid var(--border)}
+    .btn{padding:11px 24px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;border:none}
+    .btn-primary{background:var(--ink);color:var(--paper)}
+    .btn-primary:hover{background:#1e1c18;transform:translateY(-1px)}
+    .btn-primary:disabled{background:var(--border);cursor:not-allowed;transform:none}
+    .btn-ghost{background:none;border:1.5px solid var(--border);color:var(--muted)}
+    .btn-ghost:hover{border-color:var(--ink);color:var(--ink)}
+    .spinner-sm{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="#"><span>🎓</span> GestMat</a>
+  <div class="nav-links">
+     <a href="../index.html" >Dashboard</a>
+    <a href="../loans/index.html">Prêts</a>
+    <a href="../reservations/index.html">Reservation</a>
+    <a href="#" class="active">Matériels</a>
+    <a href="../teachers/index.html" >Enseignants</a>
+    <a href="../profile/index.html">Mon Profile</a>
+   
+  </div>
+  <div class="nav-user">
+    <div class="avatar-sm" id="navAvatar">A</div>
+    <span id="navName">Admin</span>
+    <button class="btn-logout" onclick="logout()">Déconnexion</button>
+  </div>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<!-- QUICK CATEGORY MODAL -->
+<div class="overlay" id="catOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Nouvelle catégorie</h3>
+      <button class="modal-close" onclick="closeCatModal()">✕</button>
+    </div>
+    <div class="field">
+      <label>Nom *</label>
+      <div class="input-wrap">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        <input type="text" id="newCatName" placeholder="Ex: Informatique"/>
+      </div>
+      <div class="field-error" id="errNewCat">Ce nom est déjà utilisé.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeCatModal()">Annuler</button>
+      <button class="btn btn-primary" id="btnCreateCat" onclick="createCategory()">Créer</button>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+  <div class="breadcrumb">
+    <a href="index.html">Matériels</a>
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9,18 15,12 9,6"/></svg>
+    <span id="breadTitle">Nouveau matériel</span>
+  </div>
+
+  <div class="form-card">
+    <div class="form-header">
+      <div class="eyebrow" id="modeLabel">Création</div>
+      <h1 id="formTitle">Nouveau matériel</h1>
+      <p id="formDesc">Remplissez les informations du nouveau matériel.</p>
+    </div>
+
+    <div class="grid-2">
+      <!-- NAME -->
+      <div class="field" style="grid-column:1/-1">
+        <label>Nom du matériel *</label>
+        <div class="input-wrap">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          <input type="text" id="fName" placeholder="Ex: Ordinateur portable Dell XPS"/>
+        </div>
+        <div class="field-error" id="errName">Le nom est requis (max 255 caractères).</div>
+      </div>
+
+      <!-- CATEGORY -->
+      <div class="field">
+        <label>Catégorie *</label>
+        <div class="cat-row">
+          <div class="input-wrap">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            <select id="fCategory">
+              <option value="">Sélectionner…</option>
+            </select>
+          </div>
+          <button class="btn-new-cat" onclick="openCatModal()">+ Nouvelle</button>
+        </div>
+        <div class="field-error" id="errCategory">La catégorie est requise.</div>
+      </div>
+
+      <!-- STATUS -->
+      <div class="field">
+        <label>État *</label>
+        <div class="input-wrap">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+          <select id="fStatus">
+            <option value="">Sélectionner…</option>
+            <option value="available">✅ Disponible</option>
+            <option value="in_use">🔵 En utilisation</option>
+            <option value="broken">🔴 En panne</option>
+            <option value="maintenance">🟡 En maintenance</option>
+          </select>
+        </div>
+        <div class="field-error" id="errStatus">L'état est requis.</div>
+      </div>
+
+      <!-- DESCRIPTION -->
+      <div class="field" style="grid-column:1/-1">
+        <label>Description <span style="color:var(--muted);font-size:10px;text-transform:none">(optionnel)</span></label>
+        <div class="input-wrap">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="top:14px;transform:none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <textarea id="fDesc" placeholder="Description du matériel, caractéristiques techniques, état général…" style="padding-left:36px"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-footer">
+      <button class="btn btn-ghost" onclick="location.href='index.html'">Annuler</button>
+      <button class="btn btn-primary" id="btnSave" onclick="save()">
+        <span class="btn-text">Enregistrer</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API   = 'http://localhost:8000/api/v1';
+const token = localStorage.getItem('token');
+if(!token) location.href='login.html';
+const user = JSON.parse(localStorage.getItem('user')||'{}');
+document.getElementById('navAvatar').textContent=(user.name||'A').slice(0,2).toUpperCase();
+document.getElementById('navName').textContent=user.name||'Admin';
+
+const editId = new URLSearchParams(location.search).get('id');
+
+function H(){return{'Content-Type':'application/json','Accept':'application/json','Authorization':`Bearer ${token}`}}
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.innerHTML=(type==='success'?'✓ ':'✗ ')+msg;
+  t.className=`toast ${type} show`;
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+async function loadCategories(selectVal){
+  const r = await fetch(`${API}/categories`,{headers:H()});
+  const d = await r.json();
+  const sel = document.getElementById('fCategory');
+  // keep first option
+  while(sel.options.length>1) sel.remove(1);
+  (d.data||[]).forEach(c=>{
+    const o=document.createElement('option');
+    o.value=c.id; o.textContent=c.name;
+    if(c.id===selectVal) o.selected=true;
+    sel.appendChild(o);
+  });
+}
+
+async function loadMaterial(){
+  if(!editId) return;
+  document.getElementById('modeLabel').textContent='Modification';
+  document.getElementById('formTitle').textContent='Modifier le matériel';
+  document.getElementById('formDesc').textContent='Mettez à jour les informations du matériel.';
+  document.getElementById('breadTitle').textContent='Modifier';
+  document.getElementById('btnSave').querySelector('.btn-text').textContent='Enregistrer les modifications';
+
+  try{
+    const r = await fetch(`${API}/materials/${editId}`,{headers:H()});
+    const d = await r.json();
+    const m = d.data;
+    document.getElementById('fName').value   = m.name||'';
+    document.getElementById('fStatus').value = m.status||'';
+    document.getElementById('fDesc').value   = m.description||'';
+    await loadCategories(m.category_id);
+  }catch(e){showToast('Erreur de chargement.','error')}
+}
+
+function clearErrors(){
+  ['errName','errCategory','errStatus'].forEach(id=>{
+    document.getElementById(id).classList.remove('show');
+    document.getElementById(id.replace('err','f').toLowerCase());
+  });
+  ['fName','fCategory','fStatus','fDesc'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.classList.remove('invalid');
+  });
+}
+
+function showErrors(errors){
+  const map = {name:'errName',category_id:'errCategory',status:'errStatus'};
+  Object.entries(errors).forEach(([k,v])=>{
+    const errEl = document.getElementById(map[k]);
+    if(errEl){errEl.textContent=v[0];errEl.classList.add('show')}
+    const inp = document.getElementById('f'+k.charAt(0).toUpperCase()+k.slice(1).replace('_id',''));
+    // try to find input
+  });
+}
+
+async function save(){
+  clearErrors();
+  const name     = document.getElementById('fName').value.trim();
+  const catId    = document.getElementById('fCategory').value;
+  const status   = document.getElementById('fStatus').value;
+  const desc     = document.getElementById('fDesc').value.trim();
+  const btn      = document.getElementById('btnSave');
+
+  let valid=true;
+  if(!name){document.getElementById('errName').classList.add('show');document.getElementById('fName').classList.add('invalid');valid=false}
+  if(!catId){document.getElementById('errCategory').classList.add('show');document.getElementById('fCategory').classList.add('invalid');valid=false}
+  if(!status){document.getElementById('errStatus').classList.add('show');document.getElementById('fStatus').classList.add('invalid');valid=false}
+  if(!valid) return;
+
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner-sm"></span>Enregistrement…';
+
+  const body={name,category_id:catId,status};
+  if(desc) body.description=desc;
+
+  try{
+    const url    = editId?`${API}/materials/${editId}`:`${API}/materials`;
+    const method = editId?'PUT':'POST';
+    const r = await fetch(url,{method,headers:H(),body:JSON.stringify(body)});
+    const d = await r.json();
+
+    if(!r.ok){
+      if(d.errors) showErrors(d.errors);
+      else showToast(d.message||'Erreur.','error');
+      return;
+    }
+
+    showToast(editId?'Matériel mis à jour.':'Matériel créé avec succès.');
+    setTimeout(()=>location.href='index.html',1200);
+  }catch(e){showToast('Erreur réseau.','error')}
+  finally{
+    btn.disabled=false;
+    btn.innerHTML=`<span class="btn-text">${editId?'Enregistrer les modifications':'Enregistrer'}</span>`;
+  }
+}
+
+// ── Quick category modal ──
+function openCatModal(){
+  document.getElementById('newCatName').value='';
+  document.getElementById('errNewCat').classList.remove('show');
+  document.getElementById('catOverlay').classList.add('show');
+  setTimeout(()=>document.getElementById('newCatName').focus(),100);
+}
+function closeCatModal(){document.getElementById('catOverlay').classList.remove('show')}
+
+async function createCategory(){
+  const name = document.getElementById('newCatName').value.trim();
+  const btn  = document.getElementById('btnCreateCat');
+  document.getElementById('errNewCat').classList.remove('show');
+  if(!name) return;
+
+  btn.disabled=true;btn.innerHTML='<span class="spinner-sm"></span>Création…';
+
+  try{
+    const r = await fetch(`${API}/categories`,{method:'POST',headers:H(),body:JSON.stringify({name})});
+    const d = await r.json();
+
+    if(!r.ok){
+      document.getElementById('errNewCat').textContent=d.errors?.name?.[0]||d.message;
+      document.getElementById('errNewCat').classList.add('show');
+      return;
+    }
+
+    closeCatModal();
+    await loadCategories(d.data.id);
+    showToast(`Catégorie "${d.data.name}" créée.`);
+  }catch(e){showToast('Erreur réseau.','error')}
+  finally{btn.disabled=false;btn.innerHTML='Créer'}
+}
+
+function logout(){
+  fetch(`${API}/auth/logout`,{method:'POST',headers:H()}).finally(()=>{
+    localStorage.removeItem('token');localStorage.removeItem('user');location.href='login.html';
+  });
+}
+
+document.getElementById('catOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeCatModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCatModal()});
+document.getElementById('newCatName').addEventListener('keydown',e=>{if(e.key==='Enter')createCategory()});
+
+loadCategories();
+loadMaterial();
+</script>
+</body>
+</html>

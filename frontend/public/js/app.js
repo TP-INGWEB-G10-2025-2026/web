@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  EduPlatform — SPA Router (History API)
+//  GestMat — SPA Router (History API)
 // ─────────────────────────────────────────────
 
 const API = "http://localhost:8000/api";
@@ -26,7 +26,6 @@ function isTeacher() {
 //  Use navigateTo() everywhere instead of window.location
 
 function navigateTo(path) {
-  console.log("Navigating to:", path);
 
   window.history.pushState({}, "", path);
   handleRouting();
@@ -49,7 +48,7 @@ const routes = [
   // ── Admin — Materials ─────────────────────────
   { path: "/admin", page: "pages/admin/dashboard.html", guard: "admin" },
   {
-    path: "/admin/materials",
+    path: "/admin/materials", 
     page: "pages/admin/materials/index.html",
     guard: "admin",
   },
@@ -177,11 +176,9 @@ function matchRoute(routePath, currentPath) {
 function applyGuard(guard) {
   // Public route: redirect logged-in users to their dashboard
 
-  console.log(`Checking guard for route with guard: ${guard}`);
 
   if (guard === "public") {
     if (isAuthenticated()) {
-      log("Already authenticated, redirecting to dashboard");
       navigateTo(isAdmin() ? "/admin/materials" : "/teacher/reservations");
       return false;
     }
@@ -190,19 +187,16 @@ function applyGuard(guard) {
 
   // All other routes require authentication
   if (!isAuthenticated()) {
-    console.log("Not authenticated, redirecting to /login");
     navigateTo("/login");
     return false;
   }
 
   if (guard === "admin" && !isAdmin()) {
-    console.log("User is not an admin, redirecting to teacher dashboard");
     navigateTo("/teacher/reservations");
     return false;
   }
 
   if (guard === "teacher" && !isTeacher()) {
-    console.log("User is not a teacher, redirecting to admin dashboard");
     navigateTo("/admin/materials");
     return false;
   }
@@ -245,7 +239,6 @@ async function loadPage(url) {
 // ── Core router ───────────────────────────────
 
 function handleRouting() {
-  console.log("Handling routing for path:", window.location.pathname);
   const path = window.location.pathname;
 
   // Walk routes in order — exact segments win over dynamic ones
@@ -278,10 +271,6 @@ function handleRouting() {
   window.routeParams = params;
 
   if (!applyGuard(matched.guard)) return;
-  log(
-    `Route matched: ${matched.path} (guard: ${matched.guard}) with params:`,
-    params,
-  );
   loadPage(matched.page);
 }
 

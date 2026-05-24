@@ -1,0 +1,408 @@
+html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Prêts — GestMat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --ink:#0f0e0c;--paper:#f5f0e8;--cream:#ede8dc;--accent:#c84b2f;
+      --gold:#b8922a;--muted:#8a8278;--border:#d4cfc5;--success:#2d9c6e;
+      --warn:#d97706;--info:#2563eb;
+    }
+    body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
+
+    nav{background:var(--ink);padding:0 48px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .nav-brand{font-family:'Playfair Display',serif;color:var(--paper);font-size:18px;display:flex;align-items:center;gap:10px;text-decoration:none}
+    .nav-links a{color:#a09890;text-decoration:none;font-size:14px;margin-left:24px;transition:color .2s}
+    .nav-links a:hover,.nav-links a.active{color:var(--paper)}
+    .nav-user{display:flex;align-items:center;gap:10px;color:#a09890;font-size:13px}
+    .avatar-sm{width:32px;height:32px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:600}
+    .btn-logout{background:none;border:1px solid #3a3830;color:#a09890;padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer;transition:all .2s}
+    .btn-logout:hover{border-color:var(--accent);color:var(--accent)}
+
+    .toast{position:fixed;bottom:32px;right:32px;background:var(--ink);color:var(--paper);padding:14px 20px;border-radius:10px;font-size:14px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,.2);transform:translateY(100px);opacity:0;transition:all .3s ease;z-index:9999;max-width:320px}
+    .toast.show{transform:translateY(0);opacity:1}
+    .toast.success{border-left:3px solid var(--success)}
+    .toast.error{border-left:3px solid var(--accent)}
+
+    .overlay{position:fixed;inset:0;background:rgba(15,14,12,.6);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;padding:24px}
+    .overlay.show{display:flex}
+    .modal{background:white;border-radius:16px;width:100%;max-width:460px;padding:32px;animation:popIn .3s ease}
+    @keyframes popIn{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+    .modal h3{font-family:'Playfair Display',serif;font-size:22px}
+    .modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);padding:4px}
+    .modal-close:hover{color:var(--ink)}
+    .modal-meta{background:var(--cream);border-radius:8px;padding:14px;margin-bottom:20px;font-size:13px}
+    .modal-meta strong{display:block;font-size:14px;margin-bottom:4px}
+    .modal-meta span{color:var(--muted)}
+    .modal-footer{display:flex;gap:12px;margin-top:24px}
+
+    .field{margin-bottom:18px}
+    .field label{display:block;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px}
+    .field input,.field select,.field textarea{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);background:white;outline:none;transition:border-color .2s;appearance:none}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}
+    .field textarea{resize:vertical;min-height:72px;line-height:1.5}
+    .field-error{font-size:12px;color:var(--accent);margin-top:4px;display:none}
+    .field.has-error input,.field.has-error select{border-color:var(--accent)}
+    .field.has-error .field-error{display:block}
+
+    .page{max-width:1200px;margin:0 auto;padding:40px 24px}
+    .page-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:24px;animation:fadeUp .4s ease}
+    .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--accent);margin-bottom:6px}
+    .page-header h1{font-family:'Playfair Display',serif;font-size:32px}
+    .page-header p{color:var(--muted);font-size:14px;margin-top:4px}
+
+    .tabs{display:flex;gap:4px;background:white;border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:20px;width:fit-content;animation:fadeUp .4s .05s ease both}
+    .tab{padding:8px 20px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:none;transition:all .2s;color:var(--muted)}
+    .tab.active{background:var(--ink);color:var(--paper)}
+    .tab:hover:not(.active){background:var(--cream);color:var(--ink)}
+
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;animation:fadeUp .4s .1s ease both}
+    .stat{background:white;border:1px solid var(--border);border-radius:10px;padding:16px 18px}
+    .stat.dark{background:var(--ink)}
+    .stat .num{font-family:'Playfair Display',serif;font-size:26px;font-weight:700}
+    .stat.dark .num{color:var(--paper)}
+    .stat .lbl{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+    .stat.dark .lbl{color:#706860}
+
+    .filters{background:white;border:1px solid var(--border);border-radius:12px;padding:16px 20px;display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;animation:fadeUp .4s .15s ease both}
+    .filter-group{flex:1;min-width:150px;position:relative}
+    .filter-group svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--muted);pointer-events:none}
+    .filter-group input,.filter-group select{width:100%;padding:9px 11px 9px 34px;background:var(--cream);border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);outline:none;transition:border-color .2s;appearance:none}
+    .filter-group input:focus,.filter-group select:focus{border-color:var(--accent)}
+
+    .table-wrap{background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden;animation:fadeUp .4s .2s ease both}
+    table{width:100%;border-collapse:collapse}
+    thead{background:var(--cream)}
+    th{padding:12px 16px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:500}
+    td{padding:13px 16px;font-size:14px;border-top:1px solid var(--border);vertical-align:middle}
+    tr:hover td{background:#faf8f4}
+    .person{display:flex;flex-direction:column}
+    .person-name{font-weight:500}
+    .person-email{font-size:12px;color:var(--muted)}
+
+    .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+    .badge-overdue{background:#fef2f0;color:var(--accent);animation:pulse 2s infinite}
+    .badge-ongoing{background:#eff6ff;color:var(--info)}
+    .badge-returned{background:#edfaf3;color:var(--success)}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+
+    .actions{display:flex;gap:6px}
+    .btn-icon{width:32px;height:32px;border-radius:7px;border:1px solid var(--border);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .15s;color:var(--muted)}
+    .btn-icon:hover{border-color:var(--ink);color:var(--ink);background:var(--cream)}
+    .btn-icon.return:hover{border-color:var(--success);color:var(--success);background:#edfaf3}
+
+    .pagination{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-top:1px solid var(--border)}
+    .pg-info{font-size:13px;color:var(--muted)}
+    .pg-btns{display:flex;gap:6px;align-items:center}
+    .pg-btn{width:32px;height:32px;border-radius:7px;border:1px solid var(--border);background:none;cursor:pointer;font-size:13px;transition:all .15s;display:flex;align-items:center;justify-content:center}
+    .pg-btn:hover:not(:disabled){border-color:var(--ink);background:var(--cream)}
+    .pg-btn.active{background:var(--ink);color:white;border-color:var(--ink)}
+    .pg-btn:disabled{opacity:.3;cursor:not-allowed}
+
+    .btn{padding:10px 20px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;border:none}
+    .btn-primary{background:var(--ink);color:var(--paper);display:flex;align-items:center;gap:8px}
+    .btn-primary:hover{background:#1e1c18;transform:translateY(-1px)}
+    .btn-success{background:var(--success);color:white;flex:1}
+    .btn-success:hover:not(:disabled){background:#237d58}
+    .btn-success:disabled{opacity:.5;cursor:not-allowed}
+    .btn-ghost{background:none;border:1.5px solid var(--border);color:var(--muted);flex:1}
+    .btn-ghost:hover{border-color:var(--ink);color:var(--ink)}
+
+    .empty{text-align:center;padding:60px 24px;color:var(--muted)}
+    .empty .icon{font-size:40px;margin-bottom:12px;opacity:.4}
+    .skeleton{background:linear-gradient(90deg,var(--cream) 25%,var(--border) 50%,var(--cream) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:4px;height:14px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="#"><span>🎓</span> GestMat</a>
+  <div class="nav-links">
+     <a href="../index.html" >Dashboard</a>
+    <a href="#" class="active">Prêts</a>
+    <a href="../reservations/index.html" >Reservation</a>
+    <a href="../materials/index.html">Matériels</a>
+    <a href="../teachers/index.html">Enseignants</a>
+    <a href="../profile/index.html">Mon Profile</a>
+   
+  </div>
+  <div class="nav-user">
+    <div class="avatar-sm" id="navAvatar">A</div>
+    <span id="navName">Admin</span>
+    <button class="btn-logout" onclick="logout()">Déconnexion</button>
+  </div>
+</nav>
+<div class="toast" id="toast"></div>
+
+<!-- RETURN MODAL -->
+<div class="overlay" id="returnOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>📥 Enregistrer le retour</h3>
+      <button class="modal-close" onclick="closeReturn()">✕</button>
+    </div>
+    <div class="modal-meta">
+      <strong id="returnLoanInfo">—</strong>
+      <span id="returnLoanSub">—</span>
+    </div>
+    <div class="field" id="fieldReturnDate">
+      <label>Date de retour effective *</label>
+      <input type="date" id="returnDate"/>
+      <div class="field-error">Date de retour requise.</div>
+    </div>
+    <div class="field" id="fieldReturnStatus">
+      <label>État du matériel *</label>
+      <select id="returnStatus">
+        <option value="">Sélectionner…</option>
+        <option value="good">✅ Bon état</option>
+        <option value="damaged">🟠 Endommagé</option>
+        <option value="lost">🔴 Perdu</option>
+      </select>
+      <div class="field-error">Veuillez sélectionner un état.</div>
+    </div>
+    <div class="field">
+      <label>Notes (optionnel)</label>
+      <textarea id="returnNotes" placeholder="Remarques sur l'état du matériel…"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeReturn()">Annuler</button>
+      <button class="btn btn-success" id="btnReturn" onclick="submitReturn()">Confirmer le retour</button>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">Gestion des prêts</div>
+      <h1>Prêts de matériels</h1>
+      <p>Suivi des prêts actifs et enregistrement des retours.</p>
+    </div>
+    <button class="btn btn-primary" onclick="location.href='loans-new.html'">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nouveau prêt
+    </button>
+  </div>
+
+  <div class="stats-row" id="statsRow">
+    <div class="stat dark"><div class="num" id="sTotal">—</div><div class="lbl">Total prêts</div></div>
+    <div class="stat"><div class="num" id="sOngoing" style="color:var(--info)">—</div><div class="lbl">En cours</div></div>
+    <div class="stat"><div class="num" id="sOverdue" style="color:var(--accent)">—</div><div class="lbl">En retard</div></div>
+    <div class="stat"><div class="num" id="sReturned" style="color:var(--success)">—</div><div class="lbl">Retournés</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="setTab('ongoing')">En cours</button>
+    <button class="tab" onclick="setTab('overdue')">⚠️ En retard</button>
+    <button class="tab" onclick="setTab('all')">Tous</button>
+    *<button class="tab" onclick="location.href='loans-history.html'">Historique →</button>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group" style="flex:2">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="fSearch" placeholder="Enseignant ou matériel…" oninput="debounce()"/>
+    </div>
+    <div class="filter-group">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <input type="date" id="fDate" onchange="load()"/>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Enseignant</th>
+          <th>Matériel</th>
+          <th>Date de prêt</th>
+          <th>Retour prévu</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="6"><div class="skeleton" style="margin:20px 0"></div></td></tr>
+      </tbody>
+    </table>
+    <div class="pagination" id="pagination" style="display:none">
+      <span class="pg-info" id="pgInfo"></span>
+      <div class="pg-btns" id="pgBtns"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:8000/api/v1';
+const token = localStorage.getItem('token');
+if (!token) location.href = '../../login.html';
+const user = JSON.parse(localStorage.getItem('user')||'{}');
+if (user.role !== 'admin') location.href = '../profile/index.html';
+document.getElementById('navAvatar').textContent = (user.name||'A').slice(0,2).toUpperCase();
+document.getElementById('navName').textContent = user.name||'Admin';
+
+function H(){ return {'Content-Type':'application/json','Accept':'application/json','Authorization':`Bearer ${token}`} }
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.innerHTML=(type==='success'?'✓ ':'✗ ')+msg;
+  t.className=`toast ${type} show`;
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function fmtDate(s){return s?new Date(s).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}):'—'}
+function isOverdue(loan){return !loan.actual_return_date && loan.expected_return_date < new Date().toISOString().split('T')[0]}
+
+let currentPage=1, currentTab='ongoing', debTimer=null, returnId=null;
+
+function setTab(tab){
+  currentTab=tab; currentPage=1;
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active',['ongoing','overdue','all','history'][i]===tab);
+  });
+  load();
+}
+
+async function load(){
+  const q = document.getElementById('fSearch').value.trim();
+  const date = document.getElementById('fDate').value;
+  const params = new URLSearchParams({page:currentPage,per_page:15});
+  if(currentTab==='ongoing') params.set('ongoing','true');
+  if(currentTab==='overdue') params.set('overdue','true');
+  if(q) params.set('search',q);
+  if(date) params.set('date',date);
+
+  const tbody=document.getElementById('tbody');
+  tbody.innerHTML=`<tr><td colspan="6"><div class="skeleton" style="margin:20px 0"></div></td></tr>`;
+  try{
+    const r=await fetch(`${API}/loans?${params}`,{headers:H()});
+    if(r.status===401){logout();return}
+    const d=await r.json();
+    renderTable(d.data||[]);
+    renderPagination(d.meta||{});
+    loadStats();
+  }catch(e){
+    tbody.innerHTML=`<tr><td colspan="6" style="text-align:center;color:var(--accent);padding:24px">Erreur de chargement.</td></tr>`;
+  }
+}
+
+function renderTable(items){
+  const tbody=document.getElementById('tbody');
+  if(!items.length){
+    tbody.innerHTML=`<tr><td colspan="6"><div class="empty"><div class="icon">📋</div><p>Aucun prêt trouvé.</p></div></td></tr>`;
+    document.getElementById('pagination').style.display='none';
+    return;
+  }
+  const today=new Date().toISOString().split('T')[0];
+  tbody.innerHTML=items.map(l=>{
+    const returned=!!l.actual_return_date;
+    const overdue=!returned && l.expected_return_date<today;
+    const status = returned ? `<span class="badge badge-returned">✓ Retourné</span>`
+                : overdue  ? `<span class="badge badge-overdue">⚠ En retard</span>`
+                           : `<span class="badge badge-ongoing">● En cours</span>`;
+    return `<tr>
+      <td><div class="person"><span class="person-name">${esc(l.user?.name||'—')}</span><span class="person-email">${esc(l.user?.email||'')}</span></div></td>
+      <td>${esc(l.material?.name||'—')}</td>
+      <td>${fmtDate(l.loan_date)}</td>
+      <td style="${overdue?'color:var(--accent);font-weight:500':''}">${fmtDate(l.expected_return_date)}</td>
+      <td>${status}</td>
+      <td><div class="actions">
+        ${!returned?`<button class="btn-icon return" title="Enregistrer le retour" onclick="openReturn('${l.id}','${esc(l.material?.name||'')}','${esc(l.user?.name||'')}','${l.expected_return_date}')">📥</button>`:''}
+        <button class="btn-icon" title="Voir historique" onclick="location.href='loans-history.html?loan=${l.id}'">👁️</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderPagination(meta){
+  const pg=document.getElementById('pagination');
+  if(!meta.last_page||meta.last_page<=1){pg.style.display='none';return}
+  pg.style.display='flex';
+  document.getElementById('pgInfo').textContent=`Page ${meta.current_page} sur ${meta.last_page} — ${meta.total} prêts`;
+  const btns=document.getElementById('pgBtns');
+  btns.innerHTML=`
+    <button class="pg-btn" onclick="goPage(${meta.current_page-1})" ${meta.current_page===1?'disabled':''}>‹</button>
+    ${Array.from({length:Math.min(meta.last_page,7)},(_,i)=>i+1).map(p=>`<button class="pg-btn ${p===meta.current_page?'active':''}" onclick="goPage(${p})">${p}</button>`).join('')}
+    <button class="pg-btn" onclick="goPage(${meta.current_page+1})" ${meta.current_page===meta.last_page?'disabled':''}>›</button>`;
+}
+
+async function loadStats(){
+  try{
+    const r=await fetch(`${API}/loans?per_page=1`,{headers:H()});
+    const d=await r.json();
+    document.getElementById('sTotal').textContent=d.meta?.total||'—';
+    const ro=await fetch(`${API}/loans?ongoing=true&per_page=1`,{headers:H()});
+    const od=await ro.json();
+    document.getElementById('sOngoing').textContent=od.meta?.total||'0';
+    const rv=await fetch(`${API}/loans?overdue=true&per_page=1`,{headers:H()});
+    const vd=await rv.json();
+    document.getElementById('sOverdue').textContent=vd.meta?.total||'0';
+    const rr=await fetch(`${API}/loans?returned=true&per_page=1`,{headers:H()});
+    const rd=await rr.json();
+    document.getElementById('sReturned').textContent=rd.meta?.total||'0';
+  }catch(e){}
+}
+
+function goPage(p){currentPage=p;load()}
+function debounce(){clearTimeout(debTimer);debTimer=setTimeout(()=>{currentPage=1;load()},400)}
+
+function openReturn(id,mat,teacher,expectedDate){
+  returnId=id;
+  document.getElementById('returnLoanInfo').textContent=mat;
+  document.getElementById('returnLoanSub').textContent=`Prêté à ${teacher} — retour prévu le ${fmtDate(expectedDate)}`;
+  document.getElementById('returnDate').value=new Date().toISOString().split('T')[0];
+  document.getElementById('returnStatus').value='';
+  document.getElementById('returnNotes').value='';
+  document.getElementById('fieldReturnDate').classList.remove('has-error');
+  document.getElementById('fieldReturnStatus').classList.remove('has-error');
+  document.getElementById('returnOverlay').classList.add('show');
+}
+
+function closeReturn(){
+  document.getElementById('returnOverlay').classList.remove('show');
+  returnId=null;
+}
+
+async function submitReturn(){
+  const rd=document.getElementById('returnDate').value;
+  const rs=document.getElementById('returnStatus').value;
+  let ok=true;
+  if(!rd){document.getElementById('fieldReturnDate').classList.add('has-error');ok=false;} else document.getElementById('fieldReturnDate').classList.remove('has-error');
+  if(!rs){document.getElementById('fieldReturnStatus').classList.add('has-error');ok=false;} else document.getElementById('fieldReturnStatus').classList.remove('has-error');
+  if(!ok) return;
+  const btn=document.getElementById('btnReturn');
+  btn.disabled=true;btn.textContent='Enregistrement…';
+  try{
+    const r=await fetch(`${API}/loans/${returnId}/return`,{method:'PATCH',headers:H(),body:JSON.stringify({
+      actual_return_date:rd,
+      return_status:rs,
+      notes:document.getElementById('returnNotes').value.trim()||null
+    })});
+    const d=await r.json();
+    if(!r.ok){showToast(d.message||'Erreur.','error');return}
+    showToast('Retour enregistré !');
+    closeReturn();
+    load();
+  }catch(e){showToast('Erreur réseau.','error')}
+  finally{btn.disabled=false;btn.textContent='Confirmer le retour'}
+}
+
+function logout(){
+  fetch(`${API}/auth/logout`,{method:'POST',headers:H()}).finally(()=>{
+    localStorage.removeItem('token');localStorage.removeItem('user');location.href='../../login.html';
+  });
+}
+
+document.getElementById('returnOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeReturn()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeReturn()});
+load();
+</script>
+</body>
+</html>

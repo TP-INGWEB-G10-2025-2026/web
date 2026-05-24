@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Réservations — Admin — GestMat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--ink:#0f0e0c;--paper:#f5f0e8;--cream:#ede8dc;--accent:#c84b2f;--gold:#b8922a;--muted:#8a8278;--border:#d4cfc5;--success:#2d9c6e;--warn:#d97706;--info:#2563eb}
+    body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
+    nav{background:var(--ink);padding:0 48px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .nav-brand{font-family:'Playfair Display',serif;color:var(--paper);font-size:18px;display:flex;align-items:center;gap:10px;text-decoration:none}
+    .nav-links a{color:#a09890;text-decoration:none;font-size:14px;margin-left:24px;transition:color .2s}
+    .nav-links a:hover,.nav-links a.active{color:var(--paper)}
+    .nav-user{display:flex;align-items:center;gap:10px;color:#a09890;font-size:13px}
+    .avatar-sm{width:32px;height:32px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:600}
+    .btn-logout{background:none;border:1px solid #3a3830;color:#a09890;padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer;transition:all .2s}
+    .btn-logout:hover{border-color:var(--accent);color:var(--accent)}
+
+    .toast{position:fixed;bottom:32px;right:32px;background:var(--ink);color:var(--paper);padding:14px 20px;border-radius:10px;font-size:14px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,.2);transform:translateY(100px);opacity:0;transition:all .3s ease;z-index:9999;max-width:320px}
+    .toast.show{transform:translateY(0);opacity:1}
+    .toast.success{border-left:3px solid var(--success)}
+    .toast.error{border-left:3px solid var(--accent)}
+
+    /* OVERLAY */
+    .overlay{position:fixed;inset:0;background:rgba(15,14,12,.6);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;padding:24px}
+    .overlay.show{display:flex}
+    .modal{background:white;border-radius:16px;width:100%;padding:32px;animation:popIn .3s ease;overflow-y:auto;max-height:90vh}
+    @keyframes popIn{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    .modal-sm{max-width:420px}
+    .modal-lg{max-width:680px}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+    .modal-header h3{font-family:'Playfair Display',serif;font-size:22px}
+    .modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)}
+    .modal-footer{display:flex;gap:12px;justify-content:flex-end;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
+
+    .page{max-width:1200px;margin:0 auto;padding:40px 24px}
+    .page-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;animation:fadeUp .4s ease}
+    .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--accent);margin-bottom:6px}
+    .page-header h1{font-family:'Playfair Display',serif;font-size:32px}
+    .page-header p{color:var(--muted);font-size:14px;margin-top:4px}
+
+    /* FILTERS */
+    .filters{background:white;border:1px solid var(--border);border-radius:12px;padding:16px 20px;display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap;animation:fadeUp .4s .1s ease both}
+    .filter-group{flex:1;min-width:150px;position:relative}
+    .filter-group svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--muted);pointer-events:none}
+    .filter-group input,.filter-group select{width:100%;padding:9px 11px 9px 34px;background:var(--cream);border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);outline:none;transition:border-color .2s;appearance:none}
+    .filter-group input:focus,.filter-group select:focus{border-color:var(--accent)}
+
+    /* SUMMARY */
+    .summary-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;animation:fadeUp .4s .15s ease both}
+    .sc{background:white;border:1px solid var(--border);border-radius:10px;padding:14px 18px;cursor:pointer;transition:all .2s;border-top:3px solid transparent}
+    .sc:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.06)}
+    .sc.active-filter{box-shadow:0 0 0 2px var(--ink)}
+    .sc-num{font-family:'Playfair Display',serif;font-size:26px;font-weight:700}
+    .sc-lbl{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+    .sc-pending{border-top-color:var(--warn)}
+    .sc-validated{border-top-color:var(--success)}
+    .sc-rejected{border-top-color:var(--accent)}
+    .sc-all{border-top-color:var(--ink)}
+
+    /* TABLE */
+    .table-wrap{background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden;animation:fadeUp .4s .2s ease both}
+    table{width:100%;border-collapse:collapse}
+    thead{background:var(--cream)}
+    th{padding:12px 16px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:500}
+    td{padding:14px 16px;font-size:14px;border-top:1px solid var(--border);vertical-align:middle}
+    tr.highlight td{background:#fffbeb}
+    tr.highlight td:first-child{border-left:3px solid var(--warn)}
+    tr:hover td{background:#faf8f4}
+
+    .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+    .badge-pending{background:#fffbeb;color:var(--warn)}
+    .badge-validated{background:#edfaf3;color:var(--success)}
+    .badge-rejected{background:#fef2f0;color:var(--accent)}
+    .badge-cancelled{background:#f3f4f6;color:#6b7280}
+
+    .actions{display:flex;gap:6px}
+    .btn-icon{width:32px;height:32px;border-radius:7px;border:1px solid var(--border);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .15s;color:var(--muted);white-space:nowrap;padding:0 8px;width:auto}
+    .btn-icon:hover{border-color:var(--ink);color:var(--ink);background:var(--cream)}
+    .btn-icon.green:hover{border-color:var(--success);color:var(--success);background:#edfaf3}
+    .btn-icon.red:hover{border-color:var(--accent);color:var(--accent);background:#fef2f0}
+
+    /* PAGINATION */
+    .pagination{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-top:1px solid var(--border)}
+    .pg-info{font-size:13px;color:var(--muted)}
+    .pg-btns{display:flex;gap:6px}
+    .pg-btn{width:32px;height:32px;border-radius:7px;border:1px solid var(--border);background:none;cursor:pointer;font-size:13px;transition:all .15s;display:flex;align-items:center;justify-content:center}
+    .pg-btn:hover:not(:disabled){border-color:var(--ink);background:var(--cream)}
+    .pg-btn.active{background:var(--ink);color:white;border-color:var(--ink)}
+    .pg-btn:disabled{opacity:.3;cursor:not-allowed}
+
+    /* REJECT FORM */
+    .field{margin-bottom:16px}
+    label{display:block;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:7px}
+    textarea{width:100%;padding:11px 14px;background:var(--cream);border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);outline:none;resize:vertical;min-height:90px;transition:border-color .2s}
+    textarea:focus{border-color:var(--accent)}
+
+    /* VALIDATE MODAL */
+    .reservation-summary{background:var(--cream);border-radius:10px;padding:16px;margin-bottom:20px}
+    .res-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:14px}
+    .res-row:last-child{border-bottom:none}
+    .res-label{color:var(--muted)}
+
+    .mat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;max-height:320px;overflow-y:auto;margin-bottom:8px}
+    .mat-option{border:2px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:all .2s;background:white}
+    .mat-option:hover{border-color:var(--ink);background:var(--cream)}
+    .mat-option.selected{border-color:var(--success);background:#edfaf3}
+    .mat-option .mat-name{font-weight:500;font-size:13px}
+    .mat-option .mat-cat{font-size:11px;color:var(--muted);margin-top:3px}
+    .mat-option .mat-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;margin-left:auto;margin-top:8px;font-size:11px;transition:all .2s}
+    .mat-option.selected .mat-check{background:var(--success);border-color:var(--success);color:white}
+
+    .avail-loading{text-align:center;padding:24px;color:var(--muted)}
+    .avail-spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .btn{padding:10px 20px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;border:none;display:inline-flex;align-items:center;gap:8px}
+    .btn-primary{background:var(--ink);color:var(--paper)}
+    .btn-primary:hover{background:#1e1c18}
+    .btn-primary:disabled{background:var(--border);cursor:not-allowed}
+    .btn-success{background:var(--success);color:white}
+    .btn-success:hover{background:#237d58}
+    .btn-success:disabled{background:var(--border);cursor:not-allowed}
+    .btn-danger{background:var(--accent);color:white}
+    .btn-danger:hover{background:#a83a22}
+    .btn-ghost{background:none;border:1.5px solid var(--border);color:var(--muted)}
+    .btn-ghost:hover{border-color:var(--ink);color:var(--ink)}
+    .spinner-sm{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite}
+
+    .empty{text-align:center;padding:60px 24px;color:var(--muted)}
+    .empty .icon{font-size:40px;margin-bottom:12px;opacity:.4}
+    .skeleton{background:linear-gradient(90deg,var(--cream) 25%,var(--border) 50%,var(--cream) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:4px;height:14px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="#"><span>🎓</span> GestMat</a>
+  <div class="nav-links">
+     <a href="../index.html" >Dashboard</a>
+    <a href="../loans/index.html">Prêts</a>
+    <a href="#" class="active">Reservation</a>
+    <a href="../materials/index.html">Matériels</a>
+    <a href="../teachers/index.html"">Enseignants</a>
+    <a href="../profile/index.html">Mon Profile</a>
+   
+  </div>
+  <div class="nav-user">
+    <div class="avatar-sm" id="navAvatar">A</div>
+    <span id="navName">Admin</span>
+    <button class="btn-logout" onclick="logout()">Déconnexion</button>
+  </div>
+</nav>
+<div class="toast" id="toast"></div>
+
+<!-- REJECT MODAL -->
+<div class="overlay" id="rejectOverlay">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3>Rejeter la demande</h3>
+      <button class="modal-close" onclick="closeReject()">✕</button>
+    </div>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:20px">Vous pouvez indiquer une raison optionnelle qui sera communiquée à l'enseignant.</p>
+    <div class="field">
+      <label>Raison du rejet <span style="color:var(--muted);font-size:10px;text-transform:none">(optionnel)</span></label>
+      <textarea id="rejectReason" placeholder="Ex : Matériel indisponible, période non couverte…"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeReject()">Annuler</button>
+      <button class="btn btn-danger" id="btnConfirmReject" onclick="confirmReject()">
+        <span class="btn-text">Confirmer le rejet</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- VALIDATE MODAL -->
+<div class="overlay" id="validateOverlay">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3>Valider la réservation</h3>
+      <button class="modal-close" onclick="closeValidate()">✕</button>
+    </div>
+
+    <!-- Reservation summary -->
+    <div class="reservation-summary" id="valSummary">
+      <div class="res-row"><span class="res-label">Enseignant</span><span id="valTeacher">—</span></div>
+      <div class="res-row"><span class="res-label">Période</span><span id="valPeriod">—</span></div>
+      <div class="res-row"><span class="res-label">Statut actuel</span><span><span class="badge badge-pending">⏳ En attente</span></span></div>
+    </div>
+
+    <!-- Material selection -->
+    <p style="font-size:13px;font-weight:500;margin-bottom:12px">Sélectionner un matériel disponible *</p>
+    <div id="matGrid" class="mat-grid">
+      <div class="avail-loading"><div class="avail-spinner"></div><p>Chargement…</p></div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:16px" id="matCount"></p>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeValidate()">Annuler</button>
+      <button class="btn btn-success" id="btnConfirmValidate" onclick="confirmValidate()" disabled>
+        <span class="btn-text">✅ Confirmer la validation</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="eyebrow">Administration</div>
+      <h1>Réservations</h1>
+      <p>Gérez et traitez les demandes de réservation.</p>
+    </div>
+  </div>
+
+  <!-- SUMMARY CARDS -->
+  <div class="summary-cards">
+    <div class="sc sc-all" onclick="setStatus('')"><div class="sc-num" id="scAll">—</div><div class="sc-lbl">Total</div></div>
+    <div class="sc sc-pending" onclick="setStatus('pending')"><div class="sc-num" id="scPending" style="color:var(--warn)">—</div><div class="sc-lbl">⏳ En attente</div></div>
+    <div class="sc sc-validated" onclick="setStatus('validated')"><div class="sc-num" id="scValidated" style="color:var(--success)">—</div><div class="sc-lbl">✅ Validées</div></div>
+    <div class="sc sc-rejected" onclick="setStatus('rejected')"><div class="sc-num" id="scRejected" style="color:var(--accent)">—</div><div class="sc-lbl">❌ Rejetées</div></div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <div class="filter-group">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <select id="fStatus" onchange="currentPage=1;load()">
+        <option value="">Tous les statuts</option>
+        <option value="pending">⏳ En attente</option>
+        <option value="validated">✅ Validées</option>
+        <option value="rejected">❌ Rejetées</option>
+        <option value="cancelled">🚫 Annulées</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <input type="date" id="fStart" onchange="currentPage=1;load()" placeholder="Depuis"/>
+    </div>
+    <div class="filter-group">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <input type="date" id="fEnd" onchange="currentPage=1;load()" placeholder="Jusqu'à"/>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Enseignant</th>
+          <th>Période</th>
+          <th>Matériel attribué</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="5"><div class="skeleton" style="margin:20px 0"></div></td></tr>
+      </tbody>
+    </table>
+    <div class="pagination" id="pagination" style="display:none">
+      <span class="pg-info" id="pgInfo"></span>
+      <div class="pg-btns" id="pgBtns"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API   = 'http://localhost:8000/api/v1';
+const token = localStorage.getItem('token');
+if(!token) location.href='login.html';
+const user = JSON.parse(localStorage.getItem('user')||'{}');
+if(user.role!=='admin') location.href='my-reservations.html';
+document.getElementById('navAvatar').textContent=(user.name||'A').slice(0,2).toUpperCase();
+document.getElementById('navName').textContent=user.name||'Admin';
+
+let currentPage=1, rejectId=null, validateId=null, selectedMaterialId=null;
+
+function H(){return{'Content-Type':'application/json','Accept':'application/json','Authorization':`Bearer ${token}`}}
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.innerHTML=(type==='success'?'✓ ':'✗ ')+msg;
+  t.className=`toast ${type} show`;
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function fmt(d){return d?new Date(d+'T00:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}):'—'}
+function fmtDT(d){return d?new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}):'—'}
+
+const BADGE={pending:'badge-pending',validated:'badge-validated',rejected:'badge-rejected',cancelled:'badge-cancelled'};
+const LABEL={pending:'⏳ En attente',validated:'✅ Validée',rejected:'❌ Rejetée',cancelled:'🚫 Annulée'};
+
+function setStatus(s){
+  document.getElementById('fStatus').value=s;
+  currentPage=1;
+  load();
+}
+
+async function load(){
+  const tbody=document.getElementById('tbody');
+  tbody.innerHTML=`<tr><td colspan="5"><div class="skeleton" style="margin:20px 0"></div></td></tr>`;
+  const status=document.getElementById('fStatus').value;
+  const start =document.getElementById('fStart').value;
+  const end   =document.getElementById('fEnd').value;
+  const params=new URLSearchParams({page:currentPage});
+  if(status) params.set('status',status);
+  if(start)  params.set('start',start);
+  if(end)    params.set('end',end);
+
+  try{
+    const r=await fetch(`${API}/reservations?${params}`,{headers:H()});
+    if(r.status===401){logout();return}
+    const d=await r.json();
+    renderTable(d.data||[]);
+    renderPagination(d.meta||{});
+    updateSummaryCards(d.meta||{},d.data||[]);
+  }catch(e){
+    tbody.innerHTML=`<tr><td colspan="5" style="text-align:center;color:var(--accent);padding:24px">Erreur de chargement.</td></tr>`;
+  }
+}
+
+function updateSummaryCards(meta, items){
+  document.getElementById('scAll').textContent      = meta.total||0;
+  document.getElementById('scPending').textContent  = items.filter(r=>r.status==='pending').length;
+  document.getElementById('scValidated').textContent= items.filter(r=>r.status==='validated').length;
+  document.getElementById('scRejected').textContent = items.filter(r=>r.status==='rejected').length;
+}
+
+function renderTable(items){
+  const tbody=document.getElementById('tbody');
+  if(!items.length){
+    tbody.innerHTML=`<tr><td colspan="5"><div class="empty"><div class="icon">📋</div><p>Aucune demande trouvée.</p></div></td></tr>`;
+    document.getElementById('pagination').style.display='none';
+    return;
+  }
+  tbody.innerHTML=items.map(r=>`
+    <tr class="${r.status==='pending'?'highlight':''}">
+      <td>
+        <div style="font-weight:500">${esc(r.user?.name||'—')}</div>
+        <div style="font-size:12px;color:var(--muted)">${esc(r.user?.email||'')}</div>
+      </td>
+      <td>
+        <div style="font-weight:500">${fmt(r.start_date)} → ${fmt(r.end_date)}</div>
+        <div style="font-size:12px;color:var(--muted)">${diffLabel(r.start_date,r.end_date)}</div>
+      </td>
+      <td>${r.material?`📦 ${esc(r.material.name)}`:`<span style="color:var(--muted);font-size:12px">—</span>`}</td>
+      <td>
+        <span class="badge ${BADGE[r.status]||''}">${LABEL[r.status]||r.status}</span>
+        ${r.rejection_reason?`<div style="font-size:11px;color:var(--muted);margin-top:4px" title="${esc(r.rejection_reason)}">📝 ${esc(r.rejection_reason.slice(0,40))}${r.rejection_reason.length>40?'…':''}</div>`:''}
+      </td>
+      <td>
+        <div class="actions">
+          ${r.status==='pending'?`
+            <button class="btn-icon green" onclick="openValidate('${r.id}','${esc(r.user?.name||'')}','${r.start_date}','${r.end_date}')">✅ Valider</button>
+            <button class="btn-icon red" onclick="openReject('${r.id}')">❌ Rejeter</button>
+          `:''}
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function diffLabel(s,e){
+  if(!s||!e) return '';
+  const d=Math.ceil((new Date(e)-new Date(s+'T00:00:00'))/(1000*60*60*24));
+  return `${d} jour${d>1?'s':''}`;
+}
+
+function renderPagination(meta){
+  const pg=document.getElementById('pagination');
+  if(!meta.last_page||meta.last_page<=1){pg.style.display='none';return}
+  pg.style.display='flex';
+  document.getElementById('pgInfo').textContent=`Page ${meta.current_page} sur ${meta.last_page} — ${meta.total} demandes`;
+  const btns=document.getElementById('pgBtns');
+  btns.innerHTML=`
+    <button class="pg-btn" onclick="goPage(${meta.current_page-1})" ${meta.current_page===1?'disabled':''}>‹</button>
+    ${Array.from({length:meta.last_page},(_,i)=>i+1).map(p=>`<button class="pg-btn ${p===meta.current_page?'active':''}" onclick="goPage(${p})">${p}</button>`).join('')}
+    <button class="pg-btn" onclick="goPage(${meta.current_page+1})" ${meta.current_page===meta.last_page?'disabled':''}>›</button>
+  `;
+}
+
+function goPage(p){currentPage=p;load()}
+
+// ── REJECT ──────────────────────────────────────────────
+function openReject(id){
+  rejectId=id;
+  document.getElementById('rejectReason').value='';
+  document.getElementById('rejectOverlay').classList.add('show');
+}
+function closeReject(){document.getElementById('rejectOverlay').classList.remove('show');rejectId=null}
+
+async function confirmReject(){
+  if(!rejectId)return;
+  const btn=document.getElementById('btnConfirmReject');
+  const reason=document.getElementById('rejectReason').value.trim();
+  btn.disabled=true;btn.innerHTML='<span class="spinner-sm"></span> Rejet…';
+
+  try{
+    const r=await fetch(`${API}/reservations/${rejectId}/reject`,{
+      method:'PATCH',headers:H(),body:JSON.stringify({reason:reason||null})
+    });
+    const d=await r.json();
+    if(!r.ok){showToast(d.message||'Erreur.','error');return}
+    showToast('Demande rejetée.');
+    closeReject();load();
+  }catch(e){showToast('Erreur réseau.','error')}
+  finally{btn.disabled=false;btn.innerHTML='<span class="btn-text">Confirmer le rejet</span>'}
+}
+
+// ── VALIDATE ─────────────────────────────────────────────
+let valStart='', valEnd='';
+
+async function openValidate(id, teacherName, start, end){
+  validateId=id; valStart=start; valEnd=end; selectedMaterialId=null;
+  document.getElementById('valTeacher').textContent=teacherName;
+  document.getElementById('valPeriod').textContent=`${fmt(start)} → ${fmt(end)}`;
+  document.getElementById('btnConfirmValidate').disabled=true;
+  document.getElementById('validateOverlay').classList.add('show');
+
+  // Load available materials
+  document.getElementById('matGrid').innerHTML=`<div class="avail-loading"><div class="avail-spinner"></div><p>Chargement des matériels disponibles…</p></div>`;
+  document.getElementById('matCount').textContent='';
+
+  try{
+    const r=await fetch(`${API}/reservations/available?start=${start}&end=${end}`,{headers:H()});
+    const d=await r.json();
+    const materials=d.data||[];
+    renderMatGrid(materials);
+    document.getElementById('matCount').textContent=`${materials.length} matériel${materials.length>1?'s':''} disponible${materials.length>1?'s':''}`;
+  }catch(e){
+    document.getElementById('matGrid').innerHTML=`<p style="color:var(--accent)">Erreur de chargement des matériels.</p>`;
+  }
+}
+
+function renderMatGrid(materials){
+  const grid=document.getElementById('matGrid');
+  if(!materials.length){
+    grid.innerHTML=`<div style="grid-column:1/-1;background:#fef2f0;border-radius:10px;padding:20px;text-align:center;color:var(--accent)">😔 Aucun matériel disponible sur cette période.</div>`;
+    return;
+  }
+  grid.innerHTML=materials.map(m=>`
+    <div class="mat-option" id="mo_${m.id}" onclick="selectMaterial('${m.id}')">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-size:20px">📦</div>
+        <div>
+          <div class="mat-name">${esc(m.name)}</div>
+          <div class="mat-cat">${esc(m.category?.name||'—')}</div>
+        </div>
+      </div>
+      <div class="mat-check" id="mc_${m.id}"></div>
+    </div>
+  `).join('');
+}
+
+function selectMaterial(id){
+  // Deselect previous
+  document.querySelectorAll('.mat-option').forEach(el=>{
+    el.classList.remove('selected');
+    const mc=el.querySelector('.mat-check');
+    if(mc) mc.textContent='';
+  });
+  // Select new
+  const option=document.getElementById(`mo_${id}`);
+  const check=document.getElementById(`mc_${id}`);
+  if(option){option.classList.add('selected')}
+  if(check){check.textContent='✓'}
+  selectedMaterialId=id;
+  document.getElementById('btnConfirmValidate').disabled=false;
+}
+
+function closeValidate(){document.getElementById('validateOverlay').classList.remove('show');validateId=null;selectedMaterialId=null}
+
+async function confirmValidate(){
+  if(!validateId||!selectedMaterialId)return;
+  const btn=document.getElementById('btnConfirmValidate');
+  btn.disabled=true;btn.innerHTML='<span class="spinner-sm"></span> Validation…';
+
+  try{
+    const r=await fetch(`${API}/reservations/${validateId}/validate`,{
+      method:'PATCH',headers:H(),body:JSON.stringify({material_id:selectedMaterialId})
+    });
+    const d=await r.json();
+    if(!r.ok){showToast(d.message||Object.values(d.errors||{})[0]?.[0]||'Erreur.','error');return}
+    showToast('Réservation validée ! Email et SMS envoyés à l\'enseignant.');
+    closeValidate();load();
+  }catch(e){showToast('Erreur réseau.','error')}
+  finally{btn.disabled=false;btn.innerHTML='<span class="btn-text">✅ Confirmer la validation</span>'}
+}
+
+function logout(){
+  fetch(`${API}/auth/logout`,{method:'POST',headers:H()}).finally(()=>{
+    localStorage.removeItem('token');localStorage.removeItem('user');location.href='login.html';
+  });
+}
+
+document.getElementById('rejectOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeReject()});
+document.getElementById('validateOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeValidate()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeReject();closeValidate()}});
+
+load();
+</script>
+</body>
+</html>
