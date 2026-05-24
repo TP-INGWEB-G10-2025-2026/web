@@ -451,7 +451,6 @@
     </style>
   </head>
   <body>
-  
     <!-- RIGHT -->
     <div class="right">
       <div class="form-card">
@@ -625,8 +624,8 @@
           setTimeout(() => {
             window.location.href =
               data.user.role === "admin"
-                ? "admin/teachers/index.html"
-                : "teacher/reservations/my-reservations.html";
+                ? "pages/admin/index.html"
+                : "pages/teacher/reservations/my-reservations.html";
           }, 1500);
         } catch (e) {
           showError("Erreur réseau. Vérifiez votre connexion.");
