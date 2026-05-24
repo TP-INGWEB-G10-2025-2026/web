@@ -1,327 +1,1087 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Statistiques — GestMat</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
-  <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{
-      --ink:#0f0e0c;--paper:#f5f0e8;--cream:#ede8dc;--accent:#c84b2f;
-      --gold:#b8922a;--muted:#8a8278;--border:#d4cfc5;--success:#2d9c6e;
-      --warn:#d97706;--info:#2563eb;
-    }
-    body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Statistiques — GestMat</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --ink: #0f0e0c;
+        --paper: #f5f0e8;
+        --cream: #ede8dc;
+        --accent: #c84b2f;
+        --gold: #b8922a;
+        --muted: #8a8278;
+        --border: #d4cfc5;
+        --success: #2d9c6e;
+        --warn: #d97706;
+        --info: #2563eb;
+      }
+      body {
+        font-family: "DM Sans", sans-serif;
+        background: var(--paper);
+        color: var(--ink);
+        min-height: 100vh;
+      }
 
-    nav{background:var(--ink);padding:0 48px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-    .nav-brand{font-family:'Playfair Display',serif;color:var(--paper);font-size:18px;display:flex;align-items:center;gap:10px;text-decoration:none}
-    .nav-links a{color:#a09890;text-decoration:none;font-size:14px;margin-left:24px;transition:color .2s}
-    .nav-links a:hover,.nav-links a.active{color:var(--paper)}
-    .nav-user{display:flex;align-items:center;gap:10px;color:#a09890;font-size:13px}
-    .avatar-sm{width:32px;height:32px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:600}
-    .btn-logout{background:none;border:1px solid #3a3830;color:#a09890;padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer;transition:all .2s}
-    .btn-logout:hover{border-color:var(--accent);color:var(--accent)}
+      nav {
+        background: var(--ink);
+        padding: 0 48px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .nav-brand {
+        font-family: "Playfair Display", serif;
+        color: var(--paper);
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+      }
+      .nav-links a {
+        color: #a09890;
+        text-decoration: none;
+        font-size: 14px;
+        margin-left: 24px;
+        transition: color 0.2s;
+      }
+      .nav-links a:hover,
+      .nav-links a.active {
+        color: var(--paper);
+      }
+      .nav-user {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #a09890;
+        font-size: 13px;
+      }
+      .avatar-sm {
+        width: 32px;
+        height: 32px;
+        background: var(--accent);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .btn-logout {
+        background: none;
+        border: 1px solid #3a3830;
+        color: #a09890;
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .btn-logout:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
 
-    .toast{position:fixed;bottom:32px;right:32px;background:var(--ink);color:var(--paper);padding:14px 20px;border-radius:10px;font-size:14px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,.2);transform:translateY(100px);opacity:0;transition:all .3s ease;z-index:9999;max-width:320px}
-    .toast.show{transform:translateY(0);opacity:1}
-    .toast.success{border-left:3px solid var(--success)}
-    .toast.error{border-left:3px solid var(--accent)}
+      .toast {
+        position: fixed;
+        bottom: 32px;
+        right: 32px;
+        background: var(--ink);
+        color: var(--paper);
+        padding: 14px 20px;
+        border-radius: 10px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        transform: translateY(100px);
+        opacity: 0;
+        transition: all 0.3s ease;
+        z-index: 9999;
+        max-width: 320px;
+      }
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      .toast.success {
+        border-left: 3px solid var(--success);
+      }
+      .toast.error {
+        border-left: 3px solid var(--accent);
+      }
 
-    .page{max-width:1200px;margin:0 auto;padding:40px 24px}
-    .page-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;animation:fadeUp .4s ease}
-    .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--accent);margin-bottom:6px}
-    .page-header h1{font-family:'Playfair Display',serif;font-size:32px}
-    .page-header p{color:var(--muted);font-size:14px;margin-top:4px}
+      .page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 24px;
+      }
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 28px;
+        animation: fadeUp 0.4s ease;
+      }
+      .eyebrow {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--accent);
+        margin-bottom: 6px;
+      }
+      .page-header h1 {
+        font-family: "Playfair Display", serif;
+        font-size: 32px;
+      }
+      .page-header p {
+        color: var(--muted);
+        font-size: 14px;
+        margin-top: 4px;
+      }
 
-    /* Period selector */
-    .period-bar{display:flex;align-items:center;gap:12px;animation:fadeUp .4s .05s ease both}
-    .period-bar label{font-size:12px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)}
-    .period-bar select,.period-bar input{padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);background:white;outline:none;transition:border-color .2s;appearance:none}
-    .period-bar select:focus,.period-bar input:focus{border-color:var(--accent)}
-    .btn-refresh{padding:8px 16px;border-radius:8px;background:var(--ink);color:var(--paper);border:none;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
-    .btn-refresh:hover{background:#1e1c18}
-    .btn-refresh.spinning svg{animation:spin .7s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
+      .period-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        animation: fadeUp 0.4s 0.05s ease both;
+      }
+      .period-bar label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--muted);
+      }
+      .period-bar select,
+      .period-bar input {
+        padding: 8px 12px;
+        border: 1.5px solid var(--border);
+        border-radius: 8px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 13px;
+        color: var(--ink);
+        background: white;
+        outline: none;
+        transition: border-color 0.2s;
+        appearance: none;
+      }
+      .period-bar select:focus,
+      .period-bar input:focus {
+        border-color: var(--accent);
+      }
+      .btn-refresh {
+        padding: 8px 16px;
+        border-radius: 8px;
+        background: var(--ink);
+        color: var(--paper);
+        border: none;
+        font-family: "DM Sans", sans-serif;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .btn-refresh:hover {
+        background: #1e1c18;
+      }
+      .btn-refresh.spinning svg {
+        animation: spin 0.7s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
 
-    /* KPI Cards */
-    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:24px 0;animation:fadeUp .4s .1s ease both}
-    .kpi{background:white;border:1px solid var(--border);border-radius:12px;padding:20px 22px;position:relative;overflow:hidden}
-    .kpi::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;border-radius:2px 0 0 2px}
-    .kpi.kpi-dark{background:var(--ink)}
-    .kpi.kpi-blue::before{background:var(--info)}
-    .kpi.kpi-red::before{background:var(--accent)}
-    .kpi.kpi-green::before{background:var(--success)}
-    .kpi.kpi-warn::before{background:var(--warn)}
-    .kpi .icon{font-size:22px;margin-bottom:10px}
-    .kpi .num{font-family:'Playfair Display',serif;font-size:30px;font-weight:700}
-    .kpi.kpi-dark .num{color:var(--paper)}
-    .kpi .lbl{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.8px;margin-top:4px}
-    .kpi.kpi-dark .lbl{color:#706860}
-    .kpi .sub{font-size:12px;color:var(--muted);margin-top:6px}
-    .kpi.kpi-dark .sub{color:#504840}
+      .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin: 24px 0;
+        animation: fadeUp 0.4s 0.1s ease both;
+      }
+      .kpi {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px 22px;
+        position: relative;
+        overflow: hidden;
+      }
+      .kpi::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        border-radius: 2px 0 0 2px;
+      }
+      .kpi.kpi-dark {
+        background: var(--ink);
+      }
+      .kpi.kpi-blue::before {
+        background: var(--info);
+      }
+      .kpi.kpi-red::before {
+        background: var(--accent);
+      }
+      .kpi.kpi-green::before {
+        background: var(--success);
+      }
+      .kpi.kpi-warn::before {
+        background: var(--warn);
+      }
+      .kpi .icon {
+        font-size: 22px;
+        margin-bottom: 10px;
+      }
+      .kpi .num {
+        font-family: "Playfair Display", serif;
+        font-size: 30px;
+        font-weight: 700;
+      }
+      .kpi.kpi-dark .num {
+        color: var(--paper);
+      }
+      .kpi .lbl {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-top: 4px;
+      }
+      .kpi.kpi-dark .lbl {
+        color: #706860;
+      }
+      .kpi .sub {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 6px;
+      }
+      .kpi.kpi-dark .sub {
+        color: #504840;
+      }
 
-    /* Two-column layout */
-    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
-    .grid-3{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+      .grid-3 {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
 
-    /* Chart cards */
-    .chart-card{background:white;border:1px solid var(--border);border-radius:12px;padding:24px;animation:fadeUp .4s .2s ease both}
-    .chart-card+.chart-card{animation-delay:.25s}
-    .chart-title{font-family:'Playfair Display',serif;font-size:18px;margin-bottom:4px}
-    .chart-sub{color:var(--muted);font-size:13px;margin-bottom:20px}
+      .chart-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        animation: fadeUp 0.4s 0.2s ease both;
+      }
+      .chart-card + .chart-card {
+        animation-delay: 0.25s;
+      }
+      .chart-title {
+        font-family: "Playfair Display", serif;
+        font-size: 18px;
+        margin-bottom: 4px;
+      }
+      .chart-sub {
+        color: var(--muted);
+        font-size: 13px;
+        margin-bottom: 20px;
+      }
 
-    /* Bar chart */
-    .bar-chart{display:flex;align-items:flex-end;gap:6px;height:160px;padding-bottom:24px;position:relative}
-    .bar-chart::after{content:'';position:absolute;bottom:24px;left:0;right:0;height:1px;background:var(--border)}
-    .bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative}
-    .bar{width:100%;background:var(--accent);border-radius:4px 4px 0 0;min-height:4px;transition:height .6s ease;position:relative;cursor:default}
-    .bar:hover{background:#a83a22}
-    .bar-tip{position:absolute;top:-28px;left:50%;transform:translateX(-50%);background:var(--ink);color:white;font-size:11px;padding:3px 7px;border-radius:4px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s}
-    .bar:hover .bar-tip{opacity:1}
-    .bar-label{font-size:10px;color:var(--muted);text-align:center;position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);white-space:nowrap}
+      .bar-chart {
+        display: flex;
+        align-items: flex-end;
+        gap: 6px;
+        height: 160px;
+        padding-bottom: 24px;
+        position: relative;
+      }
+      .bar-chart::after {
+        content: "";
+        position: absolute;
+        bottom: 24px;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: var(--border);
+      }
+      .bar-wrap {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        position: relative;
+      }
+      .bar {
+        width: 100%;
+        background: var(--accent);
+        border-radius: 4px 4px 0 0;
+        min-height: 4px;
+        transition: height 0.6s ease;
+        position: relative;
+        cursor: default;
+      }
+      .bar:hover {
+        background: #a83a22;
+      }
+      .bar-tip {
+        position: absolute;
+        top: -28px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--ink);
+        color: white;
+        font-size: 11px;
+        padding: 3px 7px;
+        border-radius: 4px;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.15s;
+      }
+      .bar:hover .bar-tip {
+        opacity: 1;
+      }
+      .bar-label {
+        font-size: 10px;
+        color: var(--muted);
+        text-align: center;
+        position: absolute;
+        bottom: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+      }
 
-    /* Donut chart */
-    .donut-wrap{display:flex;align-items:center;gap:24px}
-    .donut-svg{flex-shrink:0}
-    .donut-legend{display:flex;flex-direction:column;gap:10px;flex:1}
-    .legend-item{display:flex;align-items:center;gap:10px;font-size:13px}
-    .legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-    .legend-name{flex:1;color:var(--muted)}
-    .legend-val{font-weight:500}
-    .legend-pct{font-size:11px;color:var(--muted)}
+      .donut-wrap {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+      }
+      .donut-svg {
+        flex-shrink: 0;
+      }
+      .donut-legend {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        flex: 1;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+      }
+      .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .legend-name {
+        flex: 1;
+        color: var(--muted);
+      }
+      .legend-val {
+        font-weight: 500;
+      }
+      .legend-pct {
+        font-size: 11px;
+        color: var(--muted);
+      }
 
-    /* Top materials horizontal bars */
-    .top-list{display:flex;flex-direction:column;gap:10px}
-    .top-item{display:flex;align-items:center;gap:12px}
-    .top-rank{font-family:'Playfair Display',serif;font-size:18px;color:var(--border);width:24px;text-align:center;flex-shrink:0}
-    .top-info{flex:1}
-    .top-name{font-size:14px;font-weight:500}
-    .top-cat{font-size:12px;color:var(--muted)}
-    .top-bar-wrap{flex:2;position:relative}
-    .top-bar-bg{height:6px;background:var(--cream);border-radius:3px}
-    .top-bar-fill{height:6px;background:var(--accent);border-radius:3px;transition:width .6s ease}
-    .top-count{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;width:36px;text-align:right;flex-shrink:0}
+      .top-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .top-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .top-rank {
+        font-family: "Playfair Display", serif;
+        font-size: 18px;
+        color: var(--border);
+        width: 24px;
+        text-align: center;
+        flex-shrink: 0;
+      }
+      .top-info {
+        flex: 1;
+      }
+      .top-name {
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .top-cat {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .top-bar-wrap {
+        flex: 2;
+        position: relative;
+      }
+      .top-bar-bg {
+        height: 6px;
+        background: var(--cream);
+        border-radius: 3px;
+      }
+      .top-bar-fill {
+        height: 6px;
+        background: var(--accent);
+        border-radius: 3px;
+        transition: width 0.6s ease;
+      }
+      .top-count {
+        font-family: "Playfair Display", serif;
+        font-size: 16px;
+        font-weight: 700;
+        width: 36px;
+        text-align: right;
+        flex-shrink: 0;
+      }
 
-    /* Overdue table */
-    .table-wrap{background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden;animation:fadeUp .4s .3s ease both}
-    .table-header{padding:20px 24px 0;border-bottom:1px solid var(--cream)}
-    .table-header h3{font-family:'Playfair Display',serif;font-size:18px}
-    .table-header p{color:var(--muted);font-size:13px;margin-top:2px;margin-bottom:16px}
-    table{width:100%;border-collapse:collapse}
-    thead{background:var(--cream)}
-    th{padding:11px 16px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:500}
-    td{padding:12px 16px;font-size:14px;border-top:1px solid var(--border);vertical-align:middle}
-    tr:hover td{background:#faf8f4}
-    .person{display:flex;flex-direction:column}
-    .person-name{font-weight:500}
-    .person-email{font-size:12px;color:var(--muted)}
-    .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
-    .badge-overdue{background:#fef2f0;color:var(--accent)}
-    .badge-warn{background:#fffbeb;color:var(--warn)}
-    .days-late{font-family:'Playfair Display',serif;font-size:18px;color:var(--accent);font-weight:700}
-    .empty-row{text-align:center;color:var(--muted);font-size:14px;padding:32px}
+      .table-wrap {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+        animation: fadeUp 0.4s 0.3s ease both;
+      }
+      .table-header {
+        padding: 20px 24px 0;
+        border-bottom: 1px solid var(--cream);
+      }
+      .table-header h3 {
+        font-family: "Playfair Display", serif;
+        font-size: 18px;
+      }
+      .table-header p {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 2px;
+        margin-bottom: 16px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      thead {
+        background: var(--cream);
+      }
+      th {
+        padding: 11px 16px;
+        text-align: left;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--muted);
+        font-weight: 500;
+      }
+      td {
+        padding: 12px 16px;
+        font-size: 14px;
+        border-top: 1px solid var(--border);
+        vertical-align: middle;
+      }
+      tr:hover td {
+        background: #faf8f4;
+      }
+      .person {
+        display: flex;
+        flex-direction: column;
+      }
+      .person-name {
+        font-weight: 500;
+      }
+      .person-email {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .days-late {
+        font-family: "Playfair Display", serif;
+        font-size: 18px;
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .empty-row {
+        text-align: center;
+        color: var(--muted);
+        font-size: 14px;
+        padding: 32px;
+      }
 
-    .skeleton{background:linear-gradient(90deg,var(--cream) 25%,var(--border) 50%,var(--cream) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:4px;height:14px}
-    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-  </style>
-</head>
-<body>
+      .skeleton {
+        background: linear-gradient(
+          90deg,
+          var(--cream) 25%,
+          var(--border) 50%,
+          var(--cream) 75%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.4s infinite;
+        border-radius: 4px;
+        height: 14px;
+      }
+      @keyframes shimmer {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a class="nav-brand" href="#"><span>🎓</span> GestMat</a>
+      <div class="nav-links">
+        <a href="#" class="active">Dashboard</a>
+        <a href="loans/index.html">Prêts</a>
+        <a href="reservations/index.html">Reservation</a>
+        <a href="materials/index.html">Matériels</a>
+        <a href="teachers/index.html">Enseignants</a>
+        <a href="profile/index.html">Mon Profile</a>
+      </div>
+      <div class="nav-user">
+        <div class="avatar-sm" id="navAvatar">A</div>
+        <span id="navName">Admin</span>
+        <button class="btn-logout" onclick="logout()">Déconnexion</button>
+      </div>
+    </nav>
 
-<nav>
-  <a class="nav-brand" href="#"><span>🎓</span> GestMat</a>
-  <div class="nav-links">
-     <a href="#" class="active">Dashboard</a>
-    <a href="loans/index.html">Prêts</a>
-    <a href="reservations/index.html">Reservation</a>
-    <a href="materials/index.html">Matériels</a>
-    <a href="teachers/index.html">Enseignants</a>
-    <a href="profile/index.html">Mon Profile</a>
-   
-  </div>
-  <div class="nav-user">
-    <div class="avatar-sm" id="navAvatar">A</div>
-    <span id="navName">Admin</span>
-    <button class="btn-logout" onclick="logout()">Déconnexion</button>
-  </div>
-</nav>
+    <div class="toast" id="toast"></div>
 
-<div class="toast" id="toast"></div>
+    <div class="page">
+      <div class="page-header">
+        <div>
+          <div class="eyebrow">Analytique</div>
+          <h1>Statistiques d'utilisation</h1>
+          <p>Vue d'ensemble des tendances et indicateurs clés de gestion.</p>
+        </div>
+        <div class="period-bar">
+          <label>Année</label>
+          <select id="selYear" onchange="load()"></select>
+          <label>Mois</label>
+          <select id="selMonth" onchange="load()">
+            <option value="">Tous</option>
+            <option value="1">Janvier</option>
+            <option value="2">Février</option>
+            <option value="3">Mars</option>
+            <option value="4">Avril</option>
+            <option value="5">Mai</option>
+            <option value="6">Juin</option>
+            <option value="7">Juillet</option>
+            <option value="8">Août</option>
+            <option value="9">Septembre</option>
+            <option value="10">Octobre</option>
+            <option value="11">Novembre</option>
+            <option value="12">Décembre</option>
+          </select>
+          <button class="btn-refresh" id="btnRefresh" onclick="load()">
+            <svg
+              id="refreshIcon"
+              width="14"
+              height="14"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              viewBox="0 0 24 24"
+            >
+              <polyline points="23 4 23 10 17 10" />
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+            </svg>
+            Actualiser
+          </button>
+        </div>
+      </div>
 
-<div class="page">
-  <div class="page-header">
-    <div>
-      <div class="eyebrow">Analytique</div>
-      <h1>Statistiques d'utilisation</h1>
-      <p>Vue d'ensemble des tendances et indicateurs clés de gestion.</p>
-    </div>
-    <div class="period-bar">
-      <label>Année</label>
-      <select id="selYear" onchange="load()"></select>
-      <label>Mois</label>
-      <select id="selMonth" onchange="load()">
-        <option value="">Tous</option>
-        <option value="1">Janvier</option><option value="2">Février</option><option value="3">Mars</option>
-        <option value="4">Avril</option><option value="5">Mai</option><option value="6">Juin</option>
-        <option value="7">Juillet</option><option value="8">Août</option><option value="9">Septembre</option>
-        <option value="10">Octobre</option><option value="11">Novembre</option><option value="12">Décembre</option>
-      </select>
-      <button class="btn-refresh" id="btnRefresh" onclick="load()">
-        <svg id="refreshIcon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-        Actualiser
-      </button>
-    </div>
-  </div>
+      <!-- KPIs -->
+      <div class="kpi-grid" id="kpiGrid">
+        <div class="kpi kpi-dark kpi-blue">
+          <div class="icon">📋</div>
+          <div class="num skeleton" style="width: 60px; height: 30px"></div>
+          <div class="lbl">Prêts actifs</div>
+        </div>
+        <div class="kpi kpi-green">
+          <div class="icon">✅</div>
+          <div class="num skeleton" style="width: 60px; height: 30px"></div>
+          <div class="lbl">Matériels disponibles</div>
+        </div>
+        <div class="kpi kpi-red">
+          <div class="icon">⚠️</div>
+          <div class="num skeleton" style="width: 60px; height: 30px"></div>
+          <div class="lbl">Prêts en retard</div>
+        </div>
+        <div class="kpi kpi-warn">
+          <div class="icon">🔧</div>
+          <div class="num skeleton" style="width: 60px; height: 30px"></div>
+          <div class="lbl">Endommagés ce mois</div>
+        </div>
+      </div>
 
-  <!-- KPIs -->
-  <div class="kpi-grid" id="kpiGrid">
-    <div class="kpi kpi-dark kpi-blue"><div class="icon">📋</div><div class="num skeleton" style="width:60px;height:30px"> </div><div class="lbl">Prêts actifs</div></div>
-    <div class="kpi kpi-green"><div class="icon">✅</div><div class="num skeleton" style="width:60px;height:30px"> </div><div class="lbl">Matériels disponibles</div></div>
-    <div class="kpi kpi-red"><div class="icon">⚠️</div><div class="num skeleton" style="width:60px;height:30px"> </div><div class="lbl">Prêts en retard</div></div>
-    <div class="kpi kpi-warn"><div class="icon">🔧</div><div class="num skeleton" style="width:60px;height:30px"> </div><div class="lbl">Endommagés ce mois</div></div>
-  </div>
+      <!-- Bar chart + Donut -->
+      <div class="grid-2">
+        <div class="chart-card">
+          <div class="chart-title">Prêts par mois</div>
+          <div class="chart-sub">12 derniers mois</div>
+          <div class="bar-chart" id="barChart">
+            <div
+              style="
+                color: var(--muted);
+                font-size: 13px;
+                text-align: center;
+                width: 100%;
+              "
+            >
+              Chargement…
+            </div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Répartition par catégorie</div>
+          <div class="chart-sub">Taux d'utilisation global</div>
+          <div class="donut-wrap" id="donutWrap">
+            <div
+              style="
+                color: var(--muted);
+                font-size: 13px;
+                text-align: center;
+                width: 100%;
+              "
+            >
+              Chargement…
+            </div>
+          </div>
+        </div>
+      </div>
 
-  <!-- Bar chart + Donut -->
-  <div class="grid-2">
-    <div class="chart-card">
-      <div class="chart-title">Prêts par mois</div>
-      <div class="chart-sub">12 derniers mois</div>
-      <div class="bar-chart" id="barChart">
-        <div style="color:var(--muted);font-size:13px;text-align:center;width:100%">Chargement…</div>
+      <!-- Top materials -->
+      <div class="grid-3">
+        <div class="chart-card">
+          <div class="chart-title">Top matériels</div>
+          <div class="chart-sub">Classement par nombre d'utilisations</div>
+          <div class="top-list" id="topList">
+            <div
+              class="skeleton"
+              style="height: 20px; margin-bottom: 8px"
+            ></div>
+            <div
+              class="skeleton"
+              style="height: 20px; margin-bottom: 8px"
+            ></div>
+            <div class="skeleton" style="height: 20px"></div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Matériels en prêt</div>
+          <div class="chart-sub">Actuellement sortis</div>
+          <div
+            id="onLoanList"
+            style="display: flex; flex-direction: column; gap: 8px"
+          >
+            <div class="skeleton" style="height: 14px"></div>
+            <div class="skeleton" style="height: 14px"></div>
+            <div class="skeleton" style="height: 14px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overdue table -->
+      <div class="table-wrap">
+        <div class="table-header">
+          <h3>⚠️ Prêts en retard</h3>
+          <p>Matériels dont la date de retour prévue est dépassée.</p>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Matériel</th>
+              <th>Enseignant</th>
+              <th>Date de prêt</th>
+              <th>Retour prévu</th>
+              <th>Retard</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="overdueBody">
+            <tr>
+              <td colspan="6">
+                <div class="skeleton" style="margin: 20px 0"></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
-    <div class="chart-card">
-      <div class="chart-title">Répartition par catégorie</div>
-      <div class="chart-sub">Taux d'utilisation global</div>
-      <div class="donut-wrap" id="donutWrap">
-        <div style="color:var(--muted);font-size:13px;text-align:center;width:100%">Chargement…</div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Top materials -->
-  <div class="grid-3">
-    <div class="chart-card">
-      <div class="chart-title">Top matériels</div>
-      <div class="chart-sub">Classement par nombre d'utilisations</div>
-      <div class="top-list" id="topList">
-        <div class="skeleton" style="height:20px;margin-bottom:8px"></div>
-        <div class="skeleton" style="height:20px;margin-bottom:8px"></div>
-        <div class="skeleton" style="height:20px"></div>
-      </div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title">Matériels en prêt</div>
-      <div class="chart-sub">Actuellement sortis</div>
-      <div id="onLoanList" style="display:flex;flex-direction:column;gap:8px">
-        <div class="skeleton" style="height:14px"></div>
-        <div class="skeleton" style="height:14px"></div>
-        <div class="skeleton" style="height:14px"></div>
-      </div>
-    </div>
-  </div>
+    <script>
+      const API = "http://localhost:8000/api/v1";
+      const token = localStorage.getItem("token");
+      if (!token) location.href = "../../../index.html";
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      if (user.role !== "admin") location.href = "../../profile.html";
+      document.getElementById("navAvatar").textContent = (user.name || "A")
+        .slice(0, 2)
+        .toUpperCase();
+      document.getElementById("navName").textContent = user.name || "Admin";
 
-  <!-- Overdue table -->
-  <div class="table-wrap">
-    <div class="table-header">
-      <h3>⚠️ Prêts en retard</h3>
-      <p>Matériels dont la date de retour prévue est dépassée.</p>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Matériel</th>
-          <th>Enseignant</th>
-          <th>Date de prêt</th>
-          <th>Retour prévu</th>
-          <th>Retard</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="overdueBody">
-        <tr><td colspan="6"><div class="skeleton" style="margin:20px 0"></div></td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
+      function H() {
+        return {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        };
+      }
 
-<script>
-const API = 'http://localhost:8000/api/v1';
-const token = localStorage.getItem('token');
-if (!token) location.href = '../../../index.html';
-const user = JSON.parse(localStorage.getItem('user')||'{}');
-if (user.role !== 'admin') location.href = '../../profile.html';
-document.getElementById('navAvatar').textContent = (user.name||'A').slice(0,2).toUpperCase();
-document.getElementById('navName').textContent = user.name||'Admin';
+      function showToast(msg, type = "success") {
+        const t = document.getElementById("toast");
+        t.innerHTML = (type === "success" ? "✓ " : "✗ ") + msg;
+        t.className = `toast ${type} show`;
+        setTimeout(() => t.classList.remove("show"), 3500);
+      }
 
-function H(){ return {'Content-Type':'application/json','Accept':'application/json','Authorization':`Bearer ${token}`} }
-function showToast(msg,type='success'){
-  const t=document.getElementById('toast');
-  t.innerHTML=(type==='success'?'✓ ':'✗ ')+msg;
-  t.className=`toast ${type} show`;
-  setTimeout(()=>t.classList.remove('show'),3500);
-}
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-function fmtDate(s){return s?new Date(s).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}):'—'}
+      function esc(s) {
+        return String(s || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+      function fmtDate(s) {
+        return s
+          ? new Date(s).toLocaleDateString("fr-FR", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            })
+          : "—";
+      }
 
-// Populate year selector
-const curYear = new Date().getFullYear();
-const selYear = document.getElementById('selYear');
-for(let y=curYear;y>=curYear-4;y--){
-  const o=document.createElement('option');
-  o.value=y; o.textContent=y;
-  selYear.appendChild(o);
-}
+      // ── Robust field helpers ──────────────────────────────────────────────────────
 
-const DONUT_COLORS = ['#c84b2f','#2563eb','#2d9c6e','#b8922a','#8b5cf6','#ec4899','#14b8a6','#f97316'];
+      // Returns first non-empty array found among the given dot-notation keys
+      function extractArray(obj, ...keys) {
+        for (const key of keys) {
+          const parts = key.split(".");
+          let val = obj;
+          for (const p of parts) {
+            val = val?.[p];
+          }
+          if (Array.isArray(val) && val.length > 0) return val;
+        }
+        return [];
+      }
 
-async function load(){
-  const year = selYear.value;
-  const month = document.getElementById('selMonth').value;
-  const btn = document.getElementById('btnRefresh');
-  btn.classList.add('spinning');
+      // Returns the first numeric value found among the given keys on an item
+      function extractNum(item, ...keys) {
+        for (const k of keys) {
+          if (
+            item[k] !== undefined &&
+            item[k] !== null &&
+            !isNaN(Number(item[k]))
+          ) {
+            return Number(item[k]);
+          }
+        }
+        return 0;
+      }
 
-  const params = new URLSearchParams();
-  if(year) params.set('year', year);
-  if(month) params.set('month', month);
-  params.set('period','monthly');
+      // Extracts a month label string from a bar-chart item
+      function extractLabel(item) {
+        if (item.month_label) return item.month_label;
+        if (item.label) return item.label;
+        if (item.month) {
+          // "2024-05" or "2024-05-01"
+          const s = String(item.month);
+          const d = new Date(s.length === 7 ? s + "-01" : s);
+          if (!isNaN(d))
+            return d.toLocaleDateString("fr-FR", { month: "short" });
+          return s;
+        }
+        if (item.period) return item.period;
+        if (item.name) return item.name;
+        if (item.date) {
+          const d = new Date(item.date);
+          if (!isNaN(d))
+            return d.toLocaleDateString("fr-FR", { month: "short" });
+        }
+        return "";
+      }
 
-  try{
-    // Parallel fetches
-    const [statsR, topR, overdueR, loansR, materialsR] = await Promise.all([
-      fetch(`${API}/statistics/usage?${params}`,{headers:H()}),
-      fetch(`${API}/statistics/materials/top`,{headers:H()}),
-      fetch(`${API}/loans?overdue=true&per_page=50`,{headers:H()}),
-      fetch(`${API}/loans?ongoing=true&per_page=1`,{headers:H()}),
-      fetch(`${API}/materials?per_page=1`,{headers:H()}),
-    ]);
+      // Extracts a category display name from a usage item
+      function extractCatName(item) {
+        return (
+          item.name ||
+          item.category_name ||
+          item.category ||
+          item.label ||
+          item.title ||
+          "—"
+        );
+      }
 
-    const stats = await statsR.json();
-    const top = await topR.json();
-    const overdue = await overdueR.json();
-    const loans = await loansR.json();
-    const materials = await materialsR.json();
+      // ── Year selector ─────────────────────────────────────────────────────────────
+      const curYear = new Date().getFullYear();
+      const selYear = document.getElementById("selYear");
+      for (let y = curYear; y >= curYear - 4; y--) {
+        const o = document.createElement("option");
+        o.value = y;
+        o.textContent = y;
+        selYear.appendChild(o);
+      }
 
-    renderKPIs(stats, loans.meta?.total||0, overdue.meta?.total||0, materials.meta?.total||0);
-    renderBarChart(stats.monthly_loans || stats.loans_per_month || []);
-    renderDonut(stats.category_usage || stats.usage_by_category || []);
-    renderTop(top.data || top || []);
-    renderOnLoan(stats.currently_on_loan || []);
-    renderOverdue(overdue.data || []);
-  }catch(e){
-    showToast('Erreur de chargement des statistiques.','error');
-    // Render demo data if API unavailable
-    renderDemo();
-  }finally{
-    btn.classList.remove('spinning');
-  }
-}
+      const DONUT_COLORS = [
+        "#c84b2f",
+        "#2563eb",
+        "#2d9c6e",
+        "#b8922a",
+        "#8b5cf6",
+        "#ec4899",
+        "#14b8a6",
+        "#f97316",
+      ];
 
-function renderKPIs(stats, activeLoans, overdueCount, totalMaterials){
-  const available = stats.available_materials ?? (totalMaterials - activeLoans);
-  const damaged = stats.damaged_this_month ?? stats.damaged_count ?? '—';
-  document.getElementById('kpiGrid').innerHTML = `
+      // ── Main loader ───────────────────────────────────────────────────────────────
+      async function load() {
+        const year = selYear.value;
+        const month = document.getElementById("selMonth").value;
+        const btn = document.getElementById("btnRefresh");
+        btn.classList.add("spinning");
+
+        const params = new URLSearchParams();
+        if (year) params.set("year", year);
+        if (month) params.set("month", month);
+        params.set("period", "monthly");
+
+        try {
+          const [
+            usageR,
+            monthlyR,
+            topR,
+            summaryR,
+            overdueR,
+            loansR,
+            materialsR,
+          ] = await Promise.all([
+            fetch(`${API}/statistics/usage?${params}`, { headers: H() }),
+            fetch(`${API}/statistics/loans/monthly?${params}`, {
+              headers: H(),
+            }),
+            fetch(`${API}/statistics/materials/top`, { headers: H() }),
+            fetch(`${API}/statistics/summary`, { headers: H() }),
+            fetch(`${API}/loans?overdue=true&per_page=50`, { headers: H() }),
+            fetch(`${API}/loans?ongoing=true&per_page=1`, { headers: H() }),
+            fetch(`${API}/materials?per_page=1`, { headers: H() }),
+          ]);
+
+          const usage = await usageR.json();
+          const monthly = await monthlyR.json();
+          const top = await topR.json();
+          const summary = await summaryR.json();
+          const overdue = await overdueR.json();
+          const loans = await loansR.json();
+          const materials = await materialsR.json();
+
+          // Deep log so you can read full structure in DevTools
+          console.log("[GestMat] usage:", JSON.stringify(usage).slice(0, 500));
+          console.log(
+            "[GestMat] monthly:",
+            JSON.stringify(monthly).slice(0, 500),
+          );
+          console.log("[GestMat] top:", JSON.stringify(top).slice(0, 500));
+          console.log(
+            "[GestMat] summary:",
+            JSON.stringify(summary).slice(0, 500),
+          );
+          console.log(
+            "[GestMat] overdue[0]:",
+            JSON.stringify((overdue.data || [])[0]),
+          );
+
+          // ── Unwrap data envelopes ─────────────────────────────────────────────
+          const ud = usage.data ?? usage; // usage stats inner object
+          const mrd = monthly.data ?? monthly; // monthly loans inner object
+          const smd = summary.data ?? summary; // summary inner object
+
+          // ── Monthly loans — dedicated endpoint first, usage fallback ──────────
+          const monthlyData = extractArray(
+            mrd,
+            "loans",
+            "monthly",
+            "monthly_loans",
+            "loans_per_month",
+            "per_month",
+            "months",
+            "data",
+            "results",
+            "items",
+          ).length
+            ? extractArray(
+                mrd,
+                "loans",
+                "monthly",
+                "monthly_loans",
+                "loans_per_month",
+                "per_month",
+                "months",
+                "data",
+                "results",
+                "items",
+              )
+            : extractArray(
+                ud,
+                "monthly_loans",
+                "loans_per_month",
+                "monthly",
+                "per_month",
+                "months",
+                "loans_by_month",
+                "month_data",
+                "data",
+                "results",
+              );
+
+          // ── Category usage ────────────────────────────────────────────────────
+          const categoryData = extractArray(
+            ud,
+            "category_usage",
+            "usage_by_category",
+            "by_category",
+            "categories",
+            "category_distribution",
+            "category_stats",
+            "usage_per_category",
+            "categories_data",
+            "loan_by_category",
+          );
+
+          // ── Top materials ─────────────────────────────────────────────────────
+          const topRaw = Array.isArray(top) ? top : [];
+          const topData = extractArray(
+            top,
+            "data",
+            "materials",
+            "top_materials",
+            "items",
+            "results",
+          ).concat(topRaw);
+
+          // ── On-loan list ──────────────────────────────────────────────────────
+          const onLoanData = [
+            ...extractArray(
+              ud,
+              "currently_on_loan",
+              "on_loan",
+              "active_loans",
+              "current_loans",
+            ),
+            ...extractArray(
+              smd,
+              "currently_on_loan",
+              "on_loan",
+              "active_loans",
+              "current_loans",
+            ),
+          ];
+
+          // ── KPI numbers — merge summary + usage, prefer summary ──────────────
+          const kpi = Object.assign({}, ud, smd);
+          const activeLoans =
+            kpi.active_loans_count ??
+            kpi.active_loans ??
+            kpi.ongoing_loans ??
+            loans.meta?.total ??
+            0;
+          const overdueCount =
+            kpi.overdue_count ??
+            kpi.overdue_loans ??
+            kpi.overdue ??
+            overdue.meta?.total ??
+            0;
+          const totalMats =
+            kpi.total_materials ??
+            kpi.materials_count ??
+            materials.meta?.total ??
+            0;
+
+          renderKPIs(kpi, activeLoans, overdueCount, totalMats);
+          renderBarChart(monthlyData);
+          renderDonut(categoryData);
+          renderTop(topData);
+          renderOnLoan(onLoanData);
+          renderOverdue(overdue.data || []);
+        } catch (e) {
+          console.error("[GestMat] load error:", e);
+          showToast("Erreur de chargement des statistiques.", "error");
+          renderDemo();
+        } finally {
+          btn.classList.remove("spinning");
+        }
+      }
+
+      // ── KPI cards ─────────────────────────────────────────────────────────────────
+      function renderKPIs(stats, activeLoans, overdueCount, totalMaterials) {
+        const available =
+          stats.available_materials ??
+          stats.available ??
+          stats.materials_available ??
+          stats.available_count ??
+          stats.disponible ??
+          totalMaterials - activeLoans;
+        const damaged =
+          stats.damaged_this_month ??
+          stats.damaged_count ??
+          stats.damaged ??
+          stats.damaged_materials ??
+          stats.endommagés ??
+          "—";
+        document.getElementById("kpiGrid").innerHTML = `
     <div class="kpi kpi-dark kpi-blue">
       <div class="icon">📋</div>
       <div class="num">${activeLoans}</div>
@@ -346,163 +1106,404 @@ function renderKPIs(stats, activeLoans, overdueCount, totalMaterials){
       <div class="lbl">Endommagés ce mois</div>
       <div class="sub">Retours signalés</div>
     </div>`;
-}
+      }
 
-function renderBarChart(monthly){
-  const el = document.getElementById('barChart');
-  if(!monthly.length){el.innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center;width:100%">Aucune donnée disponible.</div>';return}
-  const max = Math.max(...monthly.map(m=>m.count||m.total||0),1);
-  el.innerHTML = monthly.map(m=>{
-    const val = m.count||m.total||0;
-    const pct = Math.round((val/max)*100);
-    const label = m.month_label || m.label || (m.month ? new Date(m.month+'-01').toLocaleDateString('fr-FR',{month:'short'}) : '');
-    return `<div class="bar-wrap">
-      <div class="bar" style="height:${Math.max(pct,4)}%" data-val="${val}">
-        <div class="bar-tip">${val} prêt${val>1?'s':''}</div>
+      // ── Bar chart ─────────────────────────────────────────────────────────────────
+      function renderBarChart(monthly) {
+        const el = document.getElementById("barChart");
+        if (!monthly || !monthly.length) {
+          el.innerHTML =
+            '<div style="color:var(--muted);font-size:13px;text-align:center;width:100%">Aucune donnée disponible.</div>';
+          return;
+        }
+        const max = Math.max(
+          ...monthly.map((m) =>
+            extractNum(
+              m,
+              "count",
+              "total",
+              "loans",
+              "value",
+              "loan_count",
+              "loans_count",
+            ),
+          ),
+          1,
+        );
+        el.innerHTML = monthly
+          .map((m) => {
+            const val = extractNum(
+              m,
+              "count",
+              "total",
+              "loans",
+              "value",
+              "loan_count",
+              "loans_count",
+            );
+            const pct = Math.round((val / max) * 100);
+            const label = extractLabel(m);
+            return `<div class="bar-wrap">
+      <div class="bar" style="height:${Math.max(pct, 4)}%">
+        <div class="bar-tip">${val} prêt${val > 1 ? "s" : ""}</div>
       </div>
       <span class="bar-label">${esc(label)}</span>
     </div>`;
-  }).join('');
-}
+          })
+          .join("");
+      }
 
-function renderDonut(categories){
-  const el = document.getElementById('donutWrap');
-  if(!categories.length){el.innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center;width:100%">Aucune donnée.</div>';return}
-  const total = categories.reduce((s,c)=>s+(c.count||c.total||0),0)||1;
-  const size=140, r=54, cx=70, cy=70;
-  let offset=0;
-  const arcs = categories.map((c,i)=>{
-    const val=c.count||c.total||0;
-    const pct=val/total;
-    const start=offset;
-    offset+=pct*2*Math.PI;
-    return {c,val,pct,start,end:offset,color:DONUT_COLORS[i%DONUT_COLORS.length]};
-  });
+      // ── Donut chart ───────────────────────────────────────────────────────────────
+      function renderDonut(categories) {
+        const el = document.getElementById("donutWrap");
+        if (!categories || !categories.length) {
+          el.innerHTML =
+            '<div style="color:var(--muted);font-size:13px;text-align:center;width:100%">Aucune donnée.</div>';
+          return;
+        }
+        const total =
+          categories.reduce(
+            (s, c) =>
+              s +
+              extractNum(
+                c,
+                "count",
+                "total",
+                "loans",
+                "value",
+                "loan_count",
+                "loans_count",
+              ),
+            0,
+          ) || 1;
+        const size = 140,
+          r = 54,
+          cx = 70,
+          cy = 70;
+        let offset = 0;
+        const arcs = categories.map((c, i) => {
+          const val = extractNum(
+            c,
+            "count",
+            "total",
+            "loans",
+            "value",
+            "loan_count",
+            "loans_count",
+          );
+          const pct = val / total;
+          const start = offset;
+          offset += pct * 2 * Math.PI;
+          return {
+            c,
+            val,
+            pct,
+            start,
+            end: offset,
+            color: DONUT_COLORS[i % DONUT_COLORS.length],
+          };
+        });
 
-  function arcPath(a){
-    const x1=cx+r*Math.sin(a.start),y1=cy-r*Math.cos(a.start);
-    const x2=cx+r*Math.sin(a.end),y2=cy-r*Math.cos(a.end);
-    const large=a.end-a.start>Math.PI?1:0;
-    return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z`;
-  }
+        function arcPath(a) {
+          const x1 = cx + r * Math.sin(a.start),
+            y1 = cy - r * Math.cos(a.start);
+          const x2 = cx + r * Math.sin(a.end),
+            y2 = cy - r * Math.cos(a.end);
+          const large = a.end - a.start > Math.PI ? 1 : 0;
+          return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z`;
+        }
 
-  const svg=`<svg class="donut-svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+        const svg = `<svg class="donut-svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
     <circle cx="${cx}" cy="${cy}" r="${r}" fill="var(--cream)"/>
-    ${arcs.map(a=>`<path d="${arcPath(a)}" fill="${a.color}" opacity=".9"/>`).join('')}
+    ${arcs.map((a) => `<path d="${arcPath(a)}" fill="${a.color}" opacity=".9"/>`).join("")}
     <circle cx="${cx}" cy="${cy}" r="36" fill="white"/>
-    <text x="${cx}" y="${cy-4}" text-anchor="middle" font-family="'Playfair Display',serif" font-size="18" fill="var(--ink)">${total}</text>
-    <text x="${cx}" y="${cy+14}" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="'DM Sans',sans-serif">prêts</text>
+    <text x="${cx}" y="${cy - 4}" text-anchor="middle"
+      font-family="'Playfair Display',serif" font-size="18" fill="var(--ink)">${total}</text>
+    <text x="${cx}" y="${cy + 14}" text-anchor="middle"
+      font-size="10" fill="var(--muted)" font-family="'DM Sans',sans-serif">prêts</text>
   </svg>`;
 
-  const legend=`<div class="donut-legend">${arcs.map(a=>`
+        const legend = `<div class="donut-legend">${arcs
+          .map(
+            (a) => `
     <div class="legend-item">
       <div class="legend-dot" style="background:${a.color}"></div>
-      <span class="legend-name">${esc(a.c.name||a.c.category_name||'—')}</span>
+      <span class="legend-name">${esc(extractCatName(a.c))}</span>
       <span class="legend-val">${a.val}</span>
-      <span class="legend-pct">${Math.round(a.pct*100)}%</span>
-    </div>`).join('')}</div>`;
+      <span class="legend-pct">${Math.round(a.pct * 100)}%</span>
+    </div>`,
+          )
+          .join("")}</div>`;
 
-  el.innerHTML=svg+legend;
-}
+        el.innerHTML = svg + legend;
+      }
 
-function renderTop(items){
-  const el=document.getElementById('topList');
-  if(!items.length){el.innerHTML='<div style="color:var(--muted);font-size:13px">Aucune donnée.</div>';return}
-  const top10=items.slice(0,10);
-  const max=top10[0]?.loans_count||top10[0]?.count||1;
-  el.innerHTML=top10.map((m,i)=>{
-    const val=m.loans_count||m.count||0;
-    const pct=Math.round((val/max)*100);
-    return `<div class="top-item">
-      <span class="top-rank">${i+1}</span>
+      // ── Top materials ─────────────────────────────────────────────────────────────
+      function renderTop(items) {
+        const el = document.getElementById("topList");
+        // Deduplicate by id or name in case of array concat overlap
+        const seen = new Set();
+        const unique = items.filter((m) => {
+          const key = m.id ?? m.name;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+        if (!unique.length) {
+          el.innerHTML =
+            '<div style="color:var(--muted);font-size:13px">Aucune donnée.</div>';
+          return;
+        }
+        const top10 = unique.slice(0, 10);
+        const max =
+          extractNum(
+            top10[0],
+            "loans_count",
+            "count",
+            "total",
+            "usage_count",
+            "loan_count",
+            "loans",
+          ) || 1;
+        el.innerHTML = top10
+          .map((m, i) => {
+            const val = extractNum(
+              m,
+              "loans_count",
+              "count",
+              "total",
+              "usage_count",
+              "loan_count",
+              "loans",
+            );
+            const pct = Math.round((val / max) * 100);
+            const catName =
+              m.category?.name || m.category_name || m.category || "";
+            return `<div class="top-item">
+      <span class="top-rank">${i + 1}</span>
       <div class="top-info">
-        <div class="top-name">${esc(m.name||'—')}</div>
-        <div class="top-cat">${esc(m.category?.name||m.category_name||'')}</div>
+        <div class="top-name">${esc(m.name || "—")}</div>
+        <div class="top-cat">${esc(catName)}</div>
       </div>
       <div class="top-bar-wrap">
         <div class="top-bar-bg"><div class="top-bar-fill" style="width:${pct}%"></div></div>
       </div>
       <span class="top-count">${val}</span>
     </div>`;
-  }).join('');
-}
+          })
+          .join("");
+      }
 
-function renderOnLoan(items){
-  const el=document.getElementById('onLoanList');
-  if(!items.length){
-    el.innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">Aucun matériel actuellement sorti.</div>';
-    return;
-  }
-  el.innerHTML=items.slice(0,8).map(m=>`
+      // ── On-loan list ──────────────────────────────────────────────────────────────
+      function renderOnLoan(items) {
+        const el = document.getElementById("onLoanList");
+        if (!items || !items.length) {
+          el.innerHTML =
+            '<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">Aucun matériel actuellement sorti.</div>';
+          return;
+        }
+        el.innerHTML = items
+          .slice(0, 8)
+          .map((m) => {
+            // Material name: try nested object, then flat fields
+            const matName =
+              m.material?.name ||
+              m.material_name ||
+              m.name ||
+              m.item_name ||
+              "—";
+            // User/teacher name: try nested objects, then flat fields
+            const userName =
+              m.user?.name ||
+              m.teacher?.name ||
+              m.borrower?.name ||
+              m.user_name ||
+              m.teacher_name ||
+              m.borrower_name ||
+              "";
+            // Return date
+            const retDate =
+              m.expected_return_date ||
+              m.return_date ||
+              m.due_date ||
+              m.expected_return ||
+              "";
+            return `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--cream);font-size:14px">
       <div>
-        <div style="font-weight:500">${esc(m.material?.name||m.name||'—')}</div>
-        <div style="font-size:12px;color:var(--muted)">${esc(m.user?.name||'')}</div>
+        <div style="font-weight:500">${esc(matName)}</div>
+        <div style="font-size:12px;color:var(--muted)">${esc(userName)}</div>
       </div>
-      <div style="font-size:12px;color:var(--muted);text-align:right">${fmtDate(m.expected_return_date)}</div>
-    </div>`).join('');
-}
+      <div style="font-size:12px;color:var(--muted);text-align:right">${fmtDate(retDate)}</div>
+    </div>`;
+          })
+          .join("");
+      }
 
-function renderOverdue(items){
-  const tbody=document.getElementById('overdueBody');
-  if(!items.length){
-    tbody.innerHTML=`<tr><td colspan="6" class="empty-row">✅ Aucun prêt en retard.</td></tr>`;
-    return;
-  }
-  const today=new Date();
-  tbody.innerHTML=items.map(l=>{
-    const exp=new Date(l.expected_return_date);
-    const days=Math.ceil((today-exp)/(1000*60*60*24));
-    const severity=days>14?'badge-overdue':'badge-warn';
-    return `<tr>
-      <td><strong>${esc(l.material?.name||'—')}</strong><br><span style="font-size:12px;color:var(--muted)">${esc(l.material?.category?.name||'')}</span></td>
-      <td><div class="person"><span class="person-name">${esc(l.user?.name||'—')}</span><span class="person-email">${esc(l.user?.email||'')}</span></div></td>
-      <td>${fmtDate(l.loan_date)}</td>
-      <td>${fmtDate(l.expected_return_date)}</td>
+      // ── Overdue table ─────────────────────────────────────────────────────────────
+      function renderOverdue(items) {
+        const tbody = document.getElementById("overdueBody");
+        if (!items || !items.length) {
+          tbody.innerHTML = `<tr><td colspan="6" class="empty-row">✅ Aucun prêt en retard.</td></tr>`;
+          return;
+        }
+        const today = new Date();
+        tbody.innerHTML = items
+          .map((l) => {
+            const expDate =
+              l.expected_return_date || l.return_date || l.due_date;
+            const exp = new Date(expDate);
+            const days = Math.ceil((today - exp) / (1000 * 60 * 60 * 24));
+            const matName = l.material?.name || l.material_name || "—";
+            const matCat =
+              l.material?.category?.name || l.material?.category_name || "";
+            const userName = l.user?.name || l.teacher?.name || "—";
+            const userEmail = l.user?.email || l.teacher?.email || "";
+            const loanDate = l.loan_date || l.start_date || l.created_at;
+            return `<tr>
+      <td>
+        <strong>${esc(matName)}</strong><br>
+        <span style="font-size:12px;color:var(--muted)">${esc(matCat)}</span>
+      </td>
+      <td>
+        <div class="person">
+          <span class="person-name">${esc(userName)}</span>
+          <span class="person-email">${esc(userEmail)}</span>
+        </div>
+      </td>
+      <td>${fmtDate(loanDate)}</td>
+      <td>${fmtDate(expDate)}</td>
       <td><span class="days-late">${days}j</span></td>
       <td><a href="loans/index.html" style="font-size:13px;color:var(--accent);text-decoration:none;font-weight:500">Retour →</a></td>
     </tr>`;
-  }).join('');
-}
+          })
+          .join("");
+      }
 
-function renderDemo(){
-  // Fallback demo data when API is unavailable
-  const months=['Sep','Oct','Nov','Déc','Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû'];
-  const counts=[12,18,9,22,15,8,25,19,11,28,16,21];
-  renderBarChart(months.map((m,i)=>({label:m,count:counts[i]})));
-  renderKPIs({available_materials:34,damaged_this_month:3},12,4,50);
-  renderDonut([
-    {name:'Informatique',count:45},{name:'Audio/Vidéo',count:30},
-    {name:'Sport',count:18},{name:'Sciences',count:12},{name:'Arts',count:7}
-  ]);
-  renderTop([
-    {name:'Projecteur Epson EB-S41',category:{name:'Audio/Vidéo'},loans_count:28},
-    {name:'MacBook Pro 13"',category:{name:'Informatique'},loans_count:24},
-    {name:'iPad Pro 11"',category:{name:'Informatique'},loans_count:19},
-    {name:'Enceinte Bluetooth JBL',category:{name:'Audio/Vidéo'},loans_count:15},
-    {name:'Microscope numérique',category:{name:'Sciences'},loans_count:12},
-    {name:'Caméra Canon EOS',category:{name:'Audio/Vidéo'},loans_count:11},
-    {name:'Kit robotique EV3',category:{name:'Sciences'},loans_count:9},
-    {name:'Tablette XP-Pen',category:{name:'Arts'},loans_count:7},
-  ]);
-  renderOnLoan([
-    {name:'Projecteur Epson',user:{name:'M. Dupont'},expected_return_date:'2024-09-05'},
-    {name:'MacBook Pro 13"',user:{name:'Mme. Martin'},expected_return_date:'2024-09-08'},
-    {name:'iPad Pro',user:{name:'M. Bernard'},expected_return_date:'2024-09-10'},
-  ]);
-  renderOverdue([
-    {material:{name:'Enceinte JBL',category:{name:'Audio/Vidéo'}},user:{name:'M. Lefebvre',email:'lefebvre@school.fr'},loan_date:'2024-07-15',expected_return_date:'2024-08-01'},
-    {material:{name:'Caméra Canon',category:{name:'Audio/Vidéo'}},user:{name:'Mme. Rousseau',email:'rousseau@school.fr'},loan_date:'2024-07-20',expected_return_date:'2024-08-10'},
-  ]);
-}
+      // ── Demo data (shown when API is unreachable) ─────────────────────────────────
+      function renderDemo() {
+        const months = [
+          "Sep",
+          "Oct",
+          "Nov",
+          "Déc",
+          "Jan",
+          "Fév",
+          "Mar",
+          "Avr",
+          "Mai",
+          "Jun",
+          "Jul",
+          "Aoû",
+        ];
+        const counts = [12, 18, 9, 22, 15, 8, 25, 19, 11, 28, 16, 21];
+        renderBarChart(months.map((label, i) => ({ label, count: counts[i] })));
+        renderKPIs(
+          { available_materials: 34, damaged_this_month: 3 },
+          12,
+          4,
+          50,
+        );
+        renderDonut([
+          { name: "Informatique", count: 45 },
+          { name: "Audio/Vidéo", count: 30 },
+          { name: "Sport", count: 18 },
+          { name: "Sciences", count: 12 },
+          { name: "Arts", count: 7 },
+        ]);
+        renderTop([
+          {
+            name: "Projecteur Epson EB-S41",
+            category: { name: "Audio/Vidéo" },
+            loans_count: 28,
+          },
+          {
+            name: 'MacBook Pro 13"',
+            category: { name: "Informatique" },
+            loans_count: 24,
+          },
+          {
+            name: 'iPad Pro 11"',
+            category: { name: "Informatique" },
+            loans_count: 19,
+          },
+          {
+            name: "Enceinte Bluetooth JBL",
+            category: { name: "Audio/Vidéo" },
+            loans_count: 15,
+          },
+          {
+            name: "Microscope numérique",
+            category: { name: "Sciences" },
+            loans_count: 12,
+          },
+          {
+            name: "Caméra Canon EOS",
+            category: { name: "Audio/Vidéo" },
+            loans_count: 11,
+          },
+          {
+            name: "Kit robotique EV3",
+            category: { name: "Sciences" },
+            loans_count: 9,
+          },
+          {
+            name: "Tablette XP-Pen",
+            category: { name: "Arts" },
+            loans_count: 7,
+          },
+        ]);
+        renderOnLoan([
+          {
+            name: "Projecteur Epson",
+            user: { name: "M. Dupont" },
+            expected_return_date: "2024-09-05",
+          },
+          {
+            name: 'MacBook Pro 13"',
+            user: { name: "Mme. Martin" },
+            expected_return_date: "2024-09-08",
+          },
+          {
+            name: "iPad Pro",
+            user: { name: "M. Bernard" },
+            expected_return_date: "2024-09-10",
+          },
+        ]);
+        renderOverdue([
+          {
+            material: {
+              name: "Enceinte JBL",
+              category: { name: "Audio/Vidéo" },
+            },
+            user: { name: "M. Lefebvre", email: "lefebvre@school.fr" },
+            loan_date: "2024-07-15",
+            expected_return_date: "2024-08-01",
+          },
+          {
+            material: {
+              name: "Caméra Canon",
+              category: { name: "Audio/Vidéo" },
+            },
+            user: { name: "Mme. Rousseau", email: "rousseau@school.fr" },
+            loan_date: "2024-07-20",
+            expected_return_date: "2024-08-10",
+          },
+        ]);
+      }
 
-function logout(){
-  fetch(`${API}/auth/logout`,{method:'POST',headers:H()}).finally(()=>{
-    localStorage.removeItem('token');localStorage.removeItem('user');location.href='../../../index.html';
-  });
-}
+      // ── Logout ────────────────────────────────────────────────────────────────────
+      function logout() {
+        fetch(`${API}/auth/logout`, { method: "POST", headers: H() }).finally(
+          () => {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            location.href = "../../../index.html";
+          },
+        );
+      }
 
-load();
-</script>
-</body>
+      load();
+    </script>
+  </body>
 </html>
