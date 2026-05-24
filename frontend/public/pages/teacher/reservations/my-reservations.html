@@ -178,7 +178,7 @@ async function load(){
   if(currentTab) params.set('status',currentTab);
 
   try{
-    const r=await fetch(`${API}/reservations/?${params}`,{headers:H()});
+    const r = await fetch(`${API}/reservations/my?${params}`, { headers: H() });
     if(r.status===401){logout();return}
     const d=await r.json();
     renderTable(d.data||[]);

@@ -106,4 +106,15 @@ class ReservationController extends Controller
             ],
         ]);
     }
+
+    /** GET /api/v1/reservations/my — teacher */
+    public function myReservations(Request $request): JsonResponse
+    {
+        $reservations = $this->reservationService->list([
+            ...$request->only(['status']),
+            'user_id' => $request->user()->id,  
+        ]);
+
+        return response()->json(new ReservationCollection($reservations));
+    }
 }

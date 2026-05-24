@@ -30,11 +30,12 @@ Route::middleware(['auth:sanctum', 'auth.api'])->group(function () {
     Route::prefix('reservations')->group(function () {
         Route::post('/new',         [ReservationController::class, 'store']);
         Route::get('/available', [ReservationController::class, 'available']);
-        Route::get('/',                [ReservationController::class, 'index']);
+        Route::get('/my',           [ReservationController::class, 'myReservations']);
+
 
         // Admin only
         Route::middleware('isAdmin')->group(function () {
-
+            Route::get('/',                [ReservationController::class, 'index']);
             Route::get('/{id}',            [ReservationController::class, 'show']);
             Route::patch('/{id}/validate', [ReservationController::class, 'validate']);
             Route::patch('/{id}/reject',   [ReservationController::class, 'reject']);
