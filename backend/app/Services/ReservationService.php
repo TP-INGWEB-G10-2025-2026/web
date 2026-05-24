@@ -41,7 +41,7 @@ class ReservationService
     {
         $reservation = Reservation::create([
             'user_id'     => $user->id,
-            'material_id' => null,
+            'material_id' => $data['material_id'] ?? null,
             'start_date'  => $data['start_date'],
             'end_date'    => $data['end_date'],
             'status'      => ReservationStatus::Pending->value,

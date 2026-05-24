@@ -249,7 +249,7 @@
 <script>
 const API = 'http://localhost:8000/api/v1';
 const token = localStorage.getItem('token');
-if (!token) location.href = '../../login.html';
+if (!token) location.href = '../../../index.html';
 const user = JSON.parse(localStorage.getItem('user')||'{}');
 if (user.role !== 'admin') location.href = '../../profile.html';
 document.getElementById('navAvatar').textContent = (user.name||'A').slice(0,2).toUpperCase();
@@ -498,7 +498,7 @@ function renderDemo(){
 
 function logout(){
   fetch(`${API}/auth/logout`,{method:'POST',headers:H()}).finally(()=>{
-    localStorage.removeItem('token');localStorage.removeItem('user');location.href='../../login.html';
+    localStorage.removeItem('token');localStorage.removeItem('user');location.href='../../../index.html';
   });
 }
 

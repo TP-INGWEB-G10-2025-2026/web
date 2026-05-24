@@ -319,12 +319,13 @@
 <nav>
   <a class="nav-brand" href="#"><span>🎓</span> GestMat</a>
   <div class="nav-links">
-    <a href="teachers.html">Enseignants</a>
-    <a href="profile.html" class="active">Mon Profil</a>
+    <a href="../reservations/my-reservations.html">Mes réservations</a>
+    <a href="../reservations/new-reservation.html">Nouvelle demande</a>
+    <a href="#" class="active">Mon profil</a>
   </div>
   <div class="nav-user">
-    <div class="avatar-sm" id="navAvatar">?</div>
-    <span id="navName">Chargement…</span>
+    <div class="avatar-sm" id="navAvatar">T</div>
+    <span id="navName">Enseignant</span>
     <button class="btn-logout" onclick="logout()">Déconnexion</button>
   </div>
 </nav>
@@ -444,7 +445,7 @@
 <script>
   const API   = 'http://localhost:8000/api/v1';
   const token = localStorage.getItem('token');
-  if (!token) window.location.href = 'login.html';
+  if (!token) window.location.href = '../../../index.html';
 
   function getHeaders() {
     return {

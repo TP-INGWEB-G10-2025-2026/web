@@ -87,7 +87,7 @@
   <div class="nav-links">
     <a href="my-reservations.html" class="active">Mes réservations</a>
     <a href="new-reservation.html">Nouvelle demande</a>
-    <a href="../../profile.htmll">Mon profil</a>
+    <a href="../profile/index.html">Mon profil</a>
   </div>
   <div class="nav-user">
     <div class="avatar-sm" id="navAvatar">T</div>
@@ -145,7 +145,7 @@
 <script>
 const API   = 'http://localhost:8000/api/v1';
 const token = localStorage.getItem('token');
-if(!token) location.href='../../login.html';
+if(!token) location.href='../../../index.html';
 const user = JSON.parse(localStorage.getItem('user')||'{}');
 document.getElementById('navAvatar').textContent=(user.name||'T').slice(0,2).toUpperCase();
 document.getElementById('navName').textContent=user.name||'Enseignant';
@@ -178,7 +178,7 @@ async function load(){
   if(currentTab) params.set('status',currentTab);
 
   try{
-    const r=await fetch(`${API}/reservations?${params}`,{headers:H()});
+    const r=await fetch(`${API}/reservations/?${params}`,{headers:H()});
     if(r.status===401){logout();return}
     const d=await r.json();
     renderTable(d.data||[]);
@@ -186,7 +186,7 @@ async function load(){
   }catch(e){
     tbody.innerHTML=`<tr><td colspan="4" style="text-align:center;color:var(--accent);padding:24px">Erreur de chargement.</td></tr>`;
   }
-}
+} 
 
 function renderTable(items){
   const tbody=document.getElementById('tbody');
@@ -239,7 +239,7 @@ function goPage(p){currentPage=p;load()}
 
 function logout(){
   fetch(`${API}/auth/logout`,{method:'POST',headers:H()}).finally(()=>{
-    localStorage.removeItem('token');localStorage.removeItem('user');location.href='../../login.html';
+    localStorage.removeItem('token');localStorage.removeItem('user');location.href='../../../index.html';
   });
 }
 

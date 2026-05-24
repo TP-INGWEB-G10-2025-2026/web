@@ -123,7 +123,7 @@
   <div class="nav-links">
     <a href="my-reservations.html">Mes réservations</a>
     <a href="new-reservation.html" class="active">Nouvelle demande</a>
-    <a href="../../profile.html">Mon profil</a>
+    <a href="../profile/index.html">Mon profil</a>
   </div>
   <div class="nav-user">
     <div class="avatar-sm" id="navAvatar">T</div>
@@ -243,7 +243,7 @@
 <script>
 const API   = 'http://localhost:8000/api/v1';
 const token = localStorage.getItem('token');
-if(!token) location.href='../../login.html';
+if(!token) location.href='../../../index.html';
 const user = JSON.parse(localStorage.getItem('user')||'{}');
 document.getElementById('navAvatar').textContent=(user.name||'T').slice(0,2).toUpperCase();
 document.getElementById('navName').textContent=user.name||'Enseignant';
@@ -368,7 +368,7 @@ async function finalSubmit(){
   btn.innerHTML='<span class="spinner-sm white"></span> Envoi…';
 
   try{
-    const r = await fetch(`${API}/reservations`,{
+    const r = await fetch(`${API}/reservations/new`,{
       method:'POST',headers:H(),
       body:JSON.stringify({
         start_date: document.getElementById('startDate').value,
@@ -403,7 +403,7 @@ function reset(){
 
 function logout(){
   fetch(`${API}/auth/logout`,{method:'POST',headers:H()}).finally(()=>{
-    localStorage.removeItem('token');localStorage.removeItem('user');location.href='../../login.html';
+    localStorage.removeItem('token');localStorage.removeItem('user');location.href='../../../index.html';
   });
 }
 

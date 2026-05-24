@@ -449,7 +449,7 @@
 <script>
   const API   = 'http://localhost:8000/api/v1';
   const token = localStorage.getItem('token');
-  if (!token) window.location.href = '../../login.html';
+  if (!token) window.location.href = '../../../index.html';
 
   function getHeaders() {
     return {
@@ -609,7 +609,7 @@
     fetch(`${API}/auth/logout`, { method:'POST', headers: getHeaders() }).finally(() => {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '../../login.html';
+      window.location.href = '../../../index.html';
     });
   }
 

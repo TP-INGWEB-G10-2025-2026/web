@@ -11,6 +11,7 @@ class StoreReservationRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'material_id' => ['nullable', 'uuid'],
             'start_date' => ['required', 'date', 'after_or_equal:today'],
             'end_date'   => ['required', 'date', 'after:start_date'],
         ];
