@@ -1,417 +1,1225 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Nouvelle réservation — GestMat</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
-  <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{--ink:#0f0e0c;--paper:#f5f0e8;--cream:#ede8dc;--accent:#c84b2f;--gold:#b8922a;--muted:#8a8278;--border:#d4cfc5;--success:#2d9c6e;--warn:#d97706;--info:#2563eb}
-    body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
-    nav{background:var(--ink);padding:0 48px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-    .nav-brand{font-family:'Playfair Display',serif;color:var(--paper);font-size:18px;display:flex;align-items:center;gap:10px;text-decoration:none}
-    .nav-links a{color:#a09890;text-decoration:none;font-size:14px;margin-left:24px;transition:color .2s}
-    .nav-links a:hover,.nav-links a.active{color:var(--paper)}
-    .nav-user{display:flex;align-items:center;gap:10px;color:#a09890;font-size:13px}
-    .avatar-sm{width:32px;height:32px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:600}
-    .btn-logout{background:none;border:1px solid #3a3830;color:#a09890;padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer;transition:all .2s}
-    .btn-logout:hover{border-color:var(--accent);color:var(--accent)}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nouvelle réservation — GestMat</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --ink: #0f0e0c;
+        --paper: #f5f0e8;
+        --cream: #ede8dc;
+        --accent: #c84b2f;
+        --gold: #b8922a;
+        --gold-light: #fffdf5;
+        --gold-border: #d4a843;
+        --muted: #8a8278;
+        --border: #d4cfc5;
+        --success: #2d9c6e;
+        --warn: #d97706;
+        --info: #2563eb;
+      }
+      body {
+        font-family: "DM Sans", sans-serif;
+        background: var(--paper);
+        color: var(--ink);
+        min-height: 100vh;
+      }
 
-    /* TOAST */
-    .toast{position:fixed;bottom:32px;right:32px;background:var(--ink);color:var(--paper);padding:14px 20px;border-radius:10px;font-size:14px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,.2);transform:translateY(100px);opacity:0;transition:all .3s ease;z-index:9999;max-width:320px}
-    .toast.show{transform:translateY(0);opacity:1}
-    .toast.success{border-left:3px solid var(--success)}
-    .toast.error{border-left:3px solid var(--accent)}
+      /* NAV */
+      nav {
+        background: var(--ink);
+        padding: 0 48px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .nav-brand {
+        font-family: "Playfair Display", serif;
+        color: var(--paper);
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+      }
+      .nav-links a {
+        color: #a09890;
+        text-decoration: none;
+        font-size: 14px;
+        margin-left: 24px;
+        transition: color 0.2s;
+      }
+      .nav-links a:hover,
+      .nav-links a.active {
+        color: var(--paper);
+      }
+      .nav-user {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #a09890;
+        font-size: 13px;
+      }
+      .avatar-sm {
+        width: 32px;
+        height: 32px;
+        background: var(--accent);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .btn-logout {
+        background: none;
+        border: 1px solid #3a3830;
+        color: #a09890;
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .btn-logout:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
 
-    /* MODAL */
-    .overlay{position:fixed;inset:0;background:rgba(15,14,12,.6);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;padding:24px}
-    .overlay.show{display:flex}
-    .modal{background:white;border-radius:16px;width:100%;max-width:460px;padding:32px;animation:popIn .3s ease}
-    @keyframes popIn{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
-    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
-    .modal-header h3{font-family:'Playfair Display',serif;font-size:22px}
-    .modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)}
-    .modal-close:hover{color:var(--ink)}
-    .modal-footer{display:flex;gap:12px;justify-content:flex-end;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
+      /* TOAST */
+      .toast {
+        position: fixed;
+        bottom: 32px;
+        right: 32px;
+        background: var(--ink);
+        color: var(--paper);
+        padding: 14px 20px;
+        border-radius: 10px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        transform: translateY(100px);
+        opacity: 0;
+        transition: all 0.3s ease;
+        z-index: 9999;
+        max-width: 320px;
+      }
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      .toast.success {
+        border-left: 3px solid var(--success);
+      }
+      .toast.error {
+        border-left: 3px solid var(--accent);
+      }
 
-    .page{max-width:800px;margin:0 auto;padding:48px 24px}
+      /* MODAL */
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 14, 12, 0.6);
+        backdrop-filter: blur(4px);
+        z-index: 500;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      .overlay.show {
+        display: flex;
+      }
+      .modal {
+        background: white;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 480px;
+        padding: 32px;
+        animation: popIn 0.3s ease;
+      }
+      @keyframes popIn {
+        from {
+          opacity: 0;
+          transform: scale(0.95) translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+      }
+      .modal-header h3 {
+        font-family: "Playfair Display", serif;
+        font-size: 22px;
+      }
+      .modal-close {
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        color: var(--muted);
+      }
+      .modal-close:hover {
+        color: var(--ink);
+      }
+      .modal-footer {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 24px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border);
+      }
 
-    .breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:32px;animation:fadeUp .4s ease}
-    .breadcrumb a{color:var(--muted);text-decoration:none;transition:color .2s}
-    .breadcrumb a:hover{color:var(--ink)}
-    .breadcrumb span{color:var(--ink);font-weight:500}
+      /* SELECTED MATERIALS LIST IN MODAL */
+      .modal-mat-list {
+        margin: 12px 0 16px;
+        padding: 0;
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .modal-mat-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--ink);
+        background: var(--cream);
+        border-radius: 6px;
+        padding: 6px 10px;
+      }
+      .modal-mat-item span.dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--gold);
+        flex-shrink: 0;
+      }
 
-    .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--accent);margin-bottom:6px}
+      .page {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 48px 24px;
+      }
 
-    /* BLOCKED ALERT */
-    .alert-blocked{background:#fef2f0;border:1.5px solid #f5c6c0;border-radius:12px;padding:20px 24px;margin-bottom:28px;display:none}
-    .alert-blocked.show{display:flex;align-items:center;gap:16px}
-    .alert-blocked .icon{font-size:28px;flex-shrink:0}
-    .alert-blocked h3{color:var(--accent);font-size:16px;margin-bottom:4px}
-    .alert-blocked p{color:#9b4040;font-size:13px}
+      .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 32px;
+        animation: fadeUp 0.4s ease;
+      }
+      .breadcrumb a {
+        color: var(--muted);
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+      .breadcrumb a:hover {
+        color: var(--ink);
+      }
+      .breadcrumb span {
+        color: var(--ink);
+        font-weight: 500;
+      }
 
-    /* STEP CARD */
-    .step-card{background:white;border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:20px;animation:fadeUp .4s ease both}
-    .step-card:nth-child(2){animation-delay:.1s}
-    .step-card:nth-child(3){animation-delay:.2s}
+      /* BLOCKED ALERT */
+      .alert-blocked {
+        background: #fef2f0;
+        border: 1.5px solid #f5c6c0;
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin-bottom: 28px;
+        display: none;
+      }
+      .alert-blocked.show {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .alert-blocked .icon {
+        font-size: 28px;
+        flex-shrink: 0;
+      }
+      .alert-blocked h3 {
+        color: var(--accent);
+        font-size: 16px;
+        margin-bottom: 4px;
+      }
+      .alert-blocked p {
+        color: #9b4040;
+        font-size: 13px;
+      }
 
-    .step-header{display:flex;align-items:center;gap:14px;margin-bottom:24px}
-    .step-num{width:36px;height:36px;background:var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:14px;font-weight:600;flex-shrink:0}
-    .step-num.done{background:var(--success)}
-    .step-title{font-family:'Playfair Display',serif;font-size:20px}
-    .step-sub{color:var(--muted);font-size:13px;margin-top:2px}
+      /* STEP CARD */
+      .step-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 32px;
+        margin-bottom: 20px;
+        animation: fadeUp 0.4s ease both;
+      }
+      .step-card:nth-child(2) {
+        animation-delay: 0.1s;
+      }
+      .step-card:nth-child(3) {
+        animation-delay: 0.2s;
+      }
 
-    /* DATE PICKERS */
-    .date-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-    @media(max-width:500px){.date-row{grid-template-columns:1fr}}
+      .step-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 24px;
+      }
+      .step-num {
+        width: 36px;
+        height: 36px;
+        background: var(--ink);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 14px;
+        font-weight: 600;
+        flex-shrink: 0;
+      }
+      .step-num.done {
+        background: var(--success);
+      }
+      .step-title {
+        font-family: "Playfair Display", serif;
+        font-size: 20px;
+      }
+      .step-sub {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 2px;
+      }
 
-    .field{margin-bottom:16px}
-    label{display:block;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:7px}
-    input[type=date]{width:100%;padding:11px 14px;background:var(--cream);border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s}
-    input[type=date]:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(200,75,47,.1);background:#fff}
-    input.invalid{border-color:var(--accent)}
-    .field-error{color:var(--accent);font-size:12px;margin-top:4px;display:none}
-    .field-error.show{display:block}
+      /* DATE PICKERS */
+      .date-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      @media (max-width: 500px) {
+        .date-row {
+          grid-template-columns: 1fr;
+        }
+      }
 
-    /* DURATION BADGE */
-    .duration-badge{display:inline-flex;align-items:center;gap:6px;background:var(--cream);padding:6px 14px;border-radius:20px;font-size:13px;color:var(--muted);margin-top:8px}
-    .duration-badge.valid{background:#edfaf3;color:var(--success)}
+      .field {
+        margin-bottom: 16px;
+      }
+      label {
+        display: block;
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--muted);
+        margin-bottom: 7px;
+      }
+      input[type="date"] {
+        width: 100%;
+        padding: 11px 14px;
+        background: var(--cream);
+        border: 1.5px solid var(--border);
+        border-radius: 8px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 14px;
+        color: var(--ink);
+        outline: none;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      input[type="date"]:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(200, 75, 47, 0.1);
+        background: #fff;
+      }
+      input.invalid {
+        border-color: var(--accent);
+      }
+      .field-error {
+        color: var(--accent);
+        font-size: 12px;
+        margin-top: 4px;
+        display: none;
+      }
+      .field-error.show {
+        display: block;
+      }
 
-    /* AVAILABILITY RESULTS */
-    .avail-section{margin-top:0}
-    .avail-loading{text-align:center;padding:32px;color:var(--muted)}
-    .avail-spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
-    @keyframes spin{to{transform:rotate(360deg)}}
+      /* DURATION BADGE */
+      .duration-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--cream);
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 8px;
+      }
+      .duration-badge.valid {
+        background: #edfaf3;
+        color: var(--success);
+      }
 
-    .avail-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:4px}
-    .avail-card{background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;gap:12px}
-    .avail-icon{width:36px;height:36px;background:white;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-    .avail-name{font-size:13px;font-weight:500}
-    .avail-cat{font-size:11px;color:var(--muted);margin-top:2px}
+      /* AVAILABILITY RESULTS */
+      .avail-section {
+        margin-top: 0;
+      }
+      .avail-loading {
+        text-align: center;
+        padding: 32px;
+        color: var(--muted);
+      }
+      .avail-spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid var(--border);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto 12px;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
 
-    .avail-empty{background:#fef2f0;border:1px solid #f5c6c0;border-radius:10px;padding:20px;text-align:center;color:var(--accent);font-size:14px}
+      /* AVAILABLE MATERIAL CARDS — SELECTABLE */
+      .avail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+        margin-top: 4px;
+      }
 
-    /* SUMMARY TABLE */
-    .summary-table{width:100%;border-collapse:collapse;margin:16px 0}
-    .summary-table td{padding:10px 14px;font-size:14px;border-bottom:1px solid var(--border)}
-    .summary-table td:first-child{color:var(--muted);width:40%}
-    .summary-table tr:last-child td{border-bottom:none}
+      .avail-card {
+        background: var(--cream);
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        padding: 14px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        transition:
+          border-color 0.15s,
+          background 0.15s,
+          box-shadow 0.15s;
+        user-select: none;
+        position: relative;
+      }
+      .avail-card:hover {
+        border-color: #c5a84a;
+        background: #fffefa;
+        box-shadow: 0 2px 8px rgba(184, 146, 42, 0.1);
+      }
+      .avail-card.selected {
+        border-color: var(--gold);
+        background: var(--gold-light);
+        box-shadow: 0 0 0 3px rgba(184, 146, 42, 0.12);
+      }
 
-    /* BUTTONS */
-    .btn{padding:11px 24px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;border:none;display:inline-flex;align-items:center;gap:8px}
-    .btn-primary{background:var(--ink);color:var(--paper)}
-    .btn-primary:hover{background:#1e1c18;transform:translateY(-1px)}
-    .btn-primary:disabled{background:var(--border);cursor:not-allowed;transform:none}
-    .btn-check{background:var(--cream);color:var(--ink);border:1.5px solid var(--border)}
-    .btn-check:hover{border-color:var(--accent);color:var(--accent)}
-    .btn-check:disabled{opacity:.5;cursor:not-allowed}
-    .btn-ghost{background:none;border:1.5px solid var(--border);color:var(--muted)}
-    .btn-ghost:hover{border-color:var(--ink);color:var(--ink)}
-    .btn-row{display:flex;gap:12px;flex-wrap:wrap}
+      /* Checkbox indicator top-right */
+      .avail-check {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 1.5px solid var(--border);
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s;
+        flex-shrink: 0;
+        font-size: 10px;
+        color: white;
+      }
+      .avail-card.selected .avail-check {
+        background: var(--gold);
+        border-color: var(--gold);
+      }
 
-    .spinner-sm{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.15);border-top-color:var(--ink);border-radius:50%;animation:spin .7s linear infinite}
-    .spinner-sm.white{border-color:rgba(255,255,255,.3);border-top-color:white}
+      .avail-icon {
+        width: 36px;
+        height: 36px;
+        background: white;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+      }
+      .avail-card.selected .avail-icon {
+        background: rgba(184, 146, 42, 0.1);
+      }
+      .avail-name {
+        font-size: 13px;
+        font-weight: 500;
+        padding-right: 18px;
+      }
+      .avail-cat {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
 
-    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-  </style>
-</head>
-<body>
+      /* SELECTION BAR */
+      .sel-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 16px;
+        padding-top: 14px;
+        border-top: 1px solid var(--border);
+      }
+      .sel-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--cream);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 5px 14px;
+        font-size: 13px;
+        color: var(--muted);
+        transition: all 0.2s;
+      }
+      .sel-pill.has-sel {
+        background: var(--gold-light);
+        border-color: var(--gold-border);
+        color: #7a5e12;
+        font-weight: 500;
+      }
+      .sel-actions {
+        display: flex;
+        gap: 8px;
+      }
+      .btn-sel {
+        background: none;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 5px 12px;
+        font-size: 12px;
+        font-family: "DM Sans", sans-serif;
+        cursor: pointer;
+        color: var(--muted);
+        transition: all 0.15s;
+      }
+      .btn-sel:hover {
+        border-color: var(--ink);
+        color: var(--ink);
+      }
 
-<nav>
-  <a class="nav-brand" href="#"><span>🎓</span> GestMat</a>
-  <div class="nav-links">
-    <a href="my-reservations.html">Mes réservations</a>
-    <a href="new-reservation.html" class="active">Nouvelle demande</a>
-    <a href="../profile/index.html">Mon profil</a>
-  </div>
-  <div class="nav-user">
-    <div class="avatar-sm" id="navAvatar">T</div>
-    <span id="navName">Enseignant</span>
-    <button class="btn-logout" onclick="logout()">Déconnexion</button>
-  </div>
-</nav>
+      .avail-empty {
+        background: #fef2f0;
+        border: 1px solid #f5c6c0;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        color: var(--accent);
+        font-size: 14px;
+      }
 
-<div class="toast" id="toast"></div>
+      /* SUMMARY TABLE */
+      .summary-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 16px 0;
+      }
+      .summary-table td {
+        padding: 10px 14px;
+        font-size: 14px;
+        border-bottom: 1px solid var(--border);
+      }
+      .summary-table td:first-child {
+        color: var(--muted);
+        width: 40%;
+      }
+      .summary-table tr:last-child td {
+        border-bottom: none;
+      }
 
-<!-- CONFIRM MODAL -->
-<div class="overlay" id="confirmOverlay">
-  <div class="modal">
-    <div class="modal-header">
-      <h3>Confirmer la demande</h3>
-      <button class="modal-close" onclick="closeConfirm()">✕</button>
-    </div>
-    <p style="color:var(--muted);font-size:14px;margin-bottom:16px">Récapitulatif de votre demande de réservation :</p>
-    <table class="summary-table">
-      <tr><td>Date de début</td><td id="sumStart" style="font-weight:600">—</td></tr>
-      <tr><td>Date de fin</td><td id="sumEnd" style="font-weight:600">—</td></tr>
-      <tr><td>Durée</td><td id="sumDuration">—</td></tr>
-      <tr><td>Matériels disponibles</td><td id="sumAvail">—</td></tr>
-      <tr><td>Statut initial</td><td><span style="background:#fffbeb;color:var(--warn);padding:2px 10px;border-radius:20px;font-size:12px">⏳ En attente</span></td></tr>
-    </table>
-    <p style="font-size:13px;color:var(--muted)">Un administrateur assignera un matériel et validera votre demande.</p>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeConfirm()">Annuler</button>
-      <button class="btn btn-primary" id="btnFinalSubmit" onclick="finalSubmit()">
-        <span class="btn-text">Confirmer l'envoi</span>
-      </button>
-    </div>
-  </div>
-</div>
+      /* BUTTONS */
+      .btn {
+        padding: 11px 24px;
+        border-radius: 8px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-primary {
+        background: var(--ink);
+        color: var(--paper);
+      }
+      .btn-primary:hover {
+        background: #1e1c18;
+        transform: translateY(-1px);
+      }
+      .btn-primary:disabled {
+        background: var(--border);
+        cursor: not-allowed;
+        transform: none;
+      }
+      .btn-check {
+        background: var(--cream);
+        color: var(--ink);
+        border: 1.5px solid var(--border);
+      }
+      .btn-check:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .btn-check:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .btn-ghost {
+        background: none;
+        border: 1.5px solid var(--border);
+        color: var(--muted);
+      }
+      .btn-ghost:hover {
+        border-color: var(--ink);
+        color: var(--ink);
+      }
+      .btn-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
 
-<div class="page">
-  <div class="breadcrumb">
-    <a href="my-reservations.html">Mes réservations</a>
-    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9,18 15,12 9,6"/></svg>
-    <span>Nouvelle demande</span>
-  </div>
+      .spinner-sm {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(0, 0, 0, 0.15);
+        border-top-color: var(--ink);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+      .spinner-sm.white {
+        border-color: rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+      }
 
-  <!-- BLOCKED ALERT -->
-  <div class="alert-blocked" id="alertBlocked">
-    <div class="icon">🚫</div>
-    <div>
-      <h3>Compte bloqué</h3>
-      <p>Votre compte est actuellement bloqué. Vous ne pouvez pas soumettre de demande de réservation. Contactez un administrateur.</p>
-    </div>
-  </div>
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a class="nav-brand" href="#"><span>🎓</span> GestMat</a>
+      <div class="nav-links">
+        <a href="my-reservations.html">Mes réservations</a>
+        <a href="new-reservation.html" class="active">Nouvelle demande</a>
+        <a href="../profile/index.html">Mon profil</a>
+      </div>
+      <div class="nav-user">
+        <div class="avatar-sm" id="navAvatar">T</div>
+        <span id="navName">Enseignant</span>
+        <button class="btn-logout" onclick="logout()">Déconnexion</button>
+      </div>
+    </nav>
 
-  <!-- STEP 1: DATES -->
-  <div class="step-card">
-    <div class="step-header">
-      <div class="step-num" id="step1Num">1</div>
-      <div>
-        <div class="step-title">Choisir la période</div>
-        <div class="step-sub">Sélectionnez les dates de début et de fin de votre besoin.</div>
+    <div class="toast" id="toast"></div>
+
+    <!-- CONFIRM MODAL -->
+    <div class="overlay" id="confirmOverlay">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>Confirmer la demande</h3>
+          <button class="modal-close" onclick="closeConfirm()">✕</button>
+        </div>
+        <p style="color: var(--muted); font-size: 14px; margin-bottom: 16px">
+          Récapitulatif de votre demande de réservation :
+        </p>
+        <table class="summary-table">
+          <tr>
+            <td>Date de début</td>
+            <td id="sumStart" style="font-weight: 600">—</td>
+          </tr>
+          <tr>
+            <td>Date de fin</td>
+            <td id="sumEnd" style="font-weight: 600">—</td>
+          </tr>
+          <tr>
+            <td>Durée</td>
+            <td id="sumDuration">—</td>
+          </tr>
+          <tr>
+            <td style="vertical-align: top; padding-top: 12px">
+              Matériels sélectionnés
+            </td>
+            <td id="sumAvailCell">
+              <ul class="modal-mat-list" id="sumMatList"></ul>
+            </td>
+          </tr>
+          <tr>
+            <td>Statut initial</td>
+            <td>
+              <span
+                style="
+                  background: #fffbeb;
+                  color: var(--warn);
+                  padding: 2px 10px;
+                  border-radius: 20px;
+                  font-size: 12px;
+                "
+                >⏳ En attente</span
+              >
+            </td>
+          </tr>
+        </table>
+        <p style="font-size: 13px; color: var(--muted)">
+          Un administrateur assignera définitivement un matériel et validera
+          votre demande.
+        </p>
+        <div class="modal-footer">
+          <button class="btn btn-ghost" onclick="closeConfirm()">
+            Annuler
+          </button>
+          <button
+            class="btn btn-primary"
+            id="btnFinalSubmit"
+            onclick="finalSubmit()"
+          >
+            <span class="btn-text">Confirmer l'envoi</span>
+          </button>
+        </div>
       </div>
     </div>
 
-    <div class="date-row">
-      <div class="field">
-        <label>Date de début *</label>
-        <input type="date" id="startDate" onchange="onDateChange()"/>
-        <div class="field-error" id="errStart">La date de début doit être aujourd'hui ou future.</div>
+    <div class="page">
+      <div class="breadcrumb">
+        <a href="my-reservations.html">Mes réservations</a>
+        <svg
+          width="14"
+          height="14"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <polyline points="9,18 15,12 9,6" />
+        </svg>
+        <span>Nouvelle demande</span>
       </div>
-      <div class="field">
-        <label>Date de fin *</label>
-        <input type="date" id="endDate" onchange="onDateChange()"/>
-        <div class="field-error" id="errEnd">La date de fin doit être après la date de début.</div>
+
+      <!-- BLOCKED ALERT -->
+      <div class="alert-blocked" id="alertBlocked">
+        <div class="icon">🚫</div>
+        <div>
+          <h3>Compte bloqué</h3>
+          <p>
+            Votre compte est actuellement bloqué. Vous ne pouvez pas soumettre
+            de demande de réservation. Contactez un administrateur.
+          </p>
+        </div>
       </div>
-    </div>
 
-    <div id="durationBadge" style="display:none">
-      <span class="duration-badge valid" id="durationText">—</span>
-    </div>
+      <!-- STEP 1: DATES -->
+      <div class="step-card">
+        <div class="step-header">
+          <div class="step-num" id="step1Num">1</div>
+          <div>
+            <div class="step-title">Choisir la période</div>
+            <div class="step-sub">
+              Sélectionnez les dates de début et de fin de votre besoin.
+            </div>
+          </div>
+        </div>
 
-    <div class="btn-row" style="margin-top:20px">
-      <button class="btn btn-check" id="btnCheck" onclick="checkAvailability()" disabled>
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        Vérifier la disponibilité
-      </button>
-    </div>
-  </div>
+        <div class="date-row">
+          <div class="field">
+            <label>Date de début *</label>
+            <input type="date" id="startDate" onchange="onDateChange()" />
+            <div class="field-error" id="errStart">
+              La date de début doit être aujourd'hui ou future.
+            </div>
+          </div>
+          <div class="field">
+            <label>Date de fin *</label>
+            <input type="date" id="endDate" onchange="onDateChange()" />
+            <div class="field-error" id="errEnd">
+              La date de fin doit être après la date de début.
+            </div>
+          </div>
+        </div>
 
-  <!-- STEP 2: AVAILABILITY -->
-  <div class="step-card" id="step2Card" style="display:none">
-    <div class="step-header">
-      <div class="step-num" id="step2Num">2</div>
-      <div>
-        <div class="step-title">Matériels disponibles</div>
-        <div class="step-sub" id="step2Sub">Matériels libres sur votre période.</div>
+        <div id="durationBadge" style="display: none">
+          <span class="duration-badge valid" id="durationText">—</span>
+        </div>
+
+        <div class="btn-row" style="margin-top: 20px">
+          <button
+            class="btn btn-check"
+            id="btnCheck"
+            onclick="checkAvailability()"
+            disabled
+          >
+            <svg
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            Vérifier la disponibilité
+          </button>
+        </div>
       </div>
-    </div>
-    <div class="avail-section" id="availSection"></div>
-  </div>
 
-  <!-- STEP 3: SUBMIT -->
-  <div class="step-card" id="step3Card" style="display:none">
-    <div class="step-header">
-      <div class="step-num">3</div>
-      <div>
-        <div class="step-title">Soumettre la demande</div>
-        <div class="step-sub">Un administrateur validera votre demande et assignera un matériel.</div>
+      <!-- STEP 2: AVAILABILITY -->
+      <div class="step-card" id="step2Card" style="display: none">
+        <div class="step-header">
+          <div class="step-num" id="step2Num">2</div>
+          <div>
+            <div class="step-title">Matériels disponibles</div>
+            <div class="step-sub" id="step2Sub">
+              Cliquez pour sélectionner un ou plusieurs matériels.
+            </div>
+          </div>
+        </div>
+        <div class="avail-section" id="availSection"></div>
       </div>
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-primary" id="btnSubmit" onclick="openConfirm()">
-        📋 Soumettre la demande
-      </button>
-      <button class="btn btn-ghost" onclick="reset()">Recommencer</button>
-    </div>
-  </div>
-</div>
 
-<script>
-const API   = 'http://localhost:8000/api/v1';
-const token = localStorage.getItem('token');
-if(!token) location.href='../../../index.html';
-const user = JSON.parse(localStorage.getItem('user')||'{}');
-document.getElementById('navAvatar').textContent=(user.name||'T').slice(0,2).toUpperCase();
-document.getElementById('navName').textContent=user.name||'Enseignant';
-
-// Set min date to today
-const today = new Date().toISOString().split('T')[0];
-document.getElementById('startDate').min = today;
-document.getElementById('endDate').min   = today;
-
-let availCount = 0;
-
-function H(){return{'Content-Type':'application/json','Accept':'application/json','Authorization':`Bearer ${token}`}}
-function showToast(msg,type='success'){
-  const t=document.getElementById('toast');
-  t.innerHTML=(type==='success'?'✓ ':'✗ ')+msg;
-  t.className=`toast ${type} show`;
-  setTimeout(()=>t.classList.remove('show'),3500);
-}
-
-function diffDays(a,b){
-  return Math.ceil((new Date(b)-new Date(a))/(1000*60*60*24));
-}
-
-function onDateChange(){
-  const s = document.getElementById('startDate').value;
-  const e = document.getElementById('endDate').value;
-  document.getElementById('errStart').classList.remove('show');
-  document.getElementById('errEnd').classList.remove('show');
-  document.getElementById('startDate').classList.remove('invalid');
-  document.getElementById('endDate').classList.remove('invalid');
-
-  const badge   = document.getElementById('durationBadge');
-  const btnCheck= document.getElementById('btnCheck');
-
-  if(s && e && e > s){
-    const days = diffDays(s,e);
-    badge.style.display='block';
-    document.getElementById('durationText').textContent=`📅 ${days} jour${days>1?'s':''} (${fmt(s)} → ${fmt(e)})`;
-    btnCheck.disabled=false;
-  } else {
-    badge.style.display='none';
-    btnCheck.disabled=true;
-  }
-
-  // Hide steps 2 & 3 if dates changed
-  document.getElementById('step2Card').style.display='none';
-  document.getElementById('step3Card').style.display='none';
-}
-
-function fmt(d){return new Date(d+'T00:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'})}
-
-async function checkAvailability(){
-  const s = document.getElementById('startDate').value;
-  const e = document.getElementById('endDate').value;
-
-  // Validate
-  let valid=true;
-  if(!s||s<today){document.getElementById('errStart').classList.add('show');document.getElementById('startDate').classList.add('invalid');valid=false}
-  if(!e||e<=s){document.getElementById('errEnd').classList.add('show');document.getElementById('endDate').classList.add('invalid');valid=false}
-  if(!valid) return;
-
-  document.getElementById('step2Card').style.display='block';
-  document.getElementById('step3Card').style.display='none';
-  document.getElementById('availSection').innerHTML=`<div class="avail-loading"><div class="avail-spinner"></div><p>Vérification de la disponibilité…</p></div>`;
-
-  try{
-    const r = await fetch(`${API}/reservations/available?start=${s}&end=${e}`,{headers:H()});
-    if(r.status===403){
-      document.getElementById('alertBlocked').classList.add('show');
-      document.getElementById('step2Card').style.display='none';
-      return;
-    }
-    const d = await r.json();
-    const materials = d.data||[];
-    availCount = d.meta?.count||materials.length;
-    renderAvailability(materials, availCount);
-    document.getElementById('step2Num').className='step-num done';
-    document.getElementById('step3Card').style.display='block';
-  }catch(e){
-    document.getElementById('availSection').innerHTML=`<div class="avail-empty">Erreur lors de la vérification. Réessayez.</div>`;
-  }
-}
-
-function renderAvailability(materials, count){
-  const section = document.getElementById('availSection');
-  document.getElementById('step2Sub').textContent=`${count} matériel${count>1?'s':''} disponible${count>1?'s':''} sur cette période.`;
-
-  if(!materials.length){
-    section.innerHTML=`<div class="avail-empty">😔 Aucun matériel disponible sur cette période. Essayez des dates différentes.</div>`;
-    document.getElementById('btnSubmit').disabled=true;
-    return;
-  }
-
-  document.getElementById('btnSubmit').disabled=false;
-  section.innerHTML=`<div class="avail-grid">${materials.map(m=>`
-    <div class="avail-card">
-      <div class="avail-icon">📦</div>
-      <div>
-        <div class="avail-name">${esc(m.name)}</div>
-        <div class="avail-cat">${esc(m.category?.name||'—')}</div>
+      <!-- STEP 3: SUBMIT -->
+      <div class="step-card" id="step3Card" style="display: none">
+        <div class="step-header">
+          <div class="step-num">3</div>
+          <div>
+            <div class="step-title">Soumettre la demande</div>
+            <div class="step-sub">
+              Un administrateur validera votre demande et assignera un matériel.
+            </div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button
+            class="btn btn-primary"
+            id="btnSubmit"
+            onclick="openConfirm()"
+            disabled
+          >
+            📋 Soumettre la demande
+          </button>
+          <button class="btn btn-ghost" onclick="reset()">Recommencer</button>
+        </div>
       </div>
     </div>
-  `).join('')}</div>`;
-}
 
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+    <script>
+      const API = "http://localhost:8000/api/v1";
+      const token = localStorage.getItem("token");
+      if (!token) location.href = "../../../index.html";
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      document.getElementById("navAvatar").textContent = (user.name || "T")
+        .slice(0, 2)
+        .toUpperCase();
+      document.getElementById("navName").textContent =
+        user.name || "Enseignant";
 
-function openConfirm(){
-  const s = document.getElementById('startDate').value;
-  const e = document.getElementById('endDate').value;
-  document.getElementById('sumStart').textContent    = fmt(s);
-  document.getElementById('sumEnd').textContent      = fmt(e);
-  document.getElementById('sumDuration').textContent = `${diffDays(s,e)} jour(s)`;
-  document.getElementById('sumAvail').textContent    = `${availCount} matériel(s)`;
-  document.getElementById('confirmOverlay').classList.add('show');
-}
-function closeConfirm(){document.getElementById('confirmOverlay').classList.remove('show')}
+      // Set min date to today
+      const today = new Date().toISOString().split("T")[0];
+      document.getElementById("startDate").min = today;
+      document.getElementById("endDate").min = today;
 
-async function finalSubmit(){
-  const btn = document.getElementById('btnFinalSubmit');
-  btn.disabled=true;
-  btn.innerHTML='<span class="spinner-sm white"></span> Envoi…';
+      // ── Selection state ──────────────────────────────────────────────
+      let selectedIds = new Set(); // Set of material IDs chosen by user
+      let allMaterials = []; // Full list returned by API
+      // ─────────────────────────────────────────────────────────────────
 
-  try{
-    const r = await fetch(`${API}/reservations/new`,{
-      method:'POST',headers:H(),
-      body:JSON.stringify({
-        start_date: document.getElementById('startDate').value,
-        end_date:   document.getElementById('endDate').value,
-      })
-    });
-    const d = await r.json();
+      function H() {
+        return {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        };
+      }
 
-    if(r.status===403){
-      document.getElementById('alertBlocked').classList.add('show');
-      closeConfirm();
-      return;
-    }
-    if(!r.ok){showToast(d.message||'Erreur.','error');return}
+      function showToast(msg, type = "success") {
+        const t = document.getElementById("toast");
+        t.innerHTML = (type === "success" ? "✓ " : "✗ ") + msg;
+        t.className = `toast ${type} show`;
+        setTimeout(() => t.classList.remove("show"), 3500);
+      }
 
-    closeConfirm();
-    showToast('Demande soumise avec succès ! Vous serez notifié(e) par email et SMS.');
-    setTimeout(()=>location.href='my-reservations.html',2000);
-  }catch(e){showToast('Erreur réseau.','error')}
-  finally{btn.disabled=false;btn.innerHTML='<span class="btn-text">Confirmer l\'envoi</span>'}
-}
+      function diffDays(a, b) {
+        return Math.ceil((new Date(b) - new Date(a)) / (1000 * 60 * 60 * 24));
+      }
 
-function reset(){
-  document.getElementById('startDate').value='';
-  document.getElementById('endDate').value='';
-  document.getElementById('step2Card').style.display='none';
-  document.getElementById('step3Card').style.display='none';
-  document.getElementById('durationBadge').style.display='none';
-  document.getElementById('btnCheck').disabled=true;
-  document.getElementById('step2Num').className='step-num';
-}
+      function onDateChange() {
+        const s = document.getElementById("startDate").value;
+        const e = document.getElementById("endDate").value;
+        document.getElementById("errStart").classList.remove("show");
+        document.getElementById("errEnd").classList.remove("show");
+        document.getElementById("startDate").classList.remove("invalid");
+        document.getElementById("endDate").classList.remove("invalid");
 
-function logout(){
-  fetch(`${API}/auth/logout`,{method:'POST',headers:H()}).finally(()=>{
-    localStorage.removeItem('token');localStorage.removeItem('user');location.href='../../../index.html';
-  });
-}
+        const badge = document.getElementById("durationBadge");
+        const btnCheck = document.getElementById("btnCheck");
 
-document.getElementById('confirmOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeConfirm()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeConfirm()});
+        if (s && e && e > s) {
+          const days = diffDays(s, e);
+          badge.style.display = "block";
+          document.getElementById("durationText").textContent =
+            `📅 ${days} jour${days > 1 ? "s" : ""} (${fmt(s)} → ${fmt(e)})`;
+          btnCheck.disabled = false;
+        } else {
+          badge.style.display = "none";
+          btnCheck.disabled = true;
+        }
 
-// Check if blocked
-if(user.is_blocked) document.getElementById('alertBlocked').classList.add('show');
-</script>
-</body>
+        // Reset steps 2 & 3 when dates change
+        document.getElementById("step2Card").style.display = "none";
+        document.getElementById("step3Card").style.display = "none";
+        selectedIds.clear();
+        allMaterials = [];
+      }
+
+      function fmt(d) {
+        return new Date(d + "T00:00:00").toLocaleDateString("fr-FR", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        });
+      }
+
+      async function checkAvailability() {
+        const s = document.getElementById("startDate").value;
+        const e = document.getElementById("endDate").value;
+
+        let valid = true;
+        if (!s || s < today) {
+          document.getElementById("errStart").classList.add("show");
+          document.getElementById("startDate").classList.add("invalid");
+          valid = false;
+        }
+        if (!e || e <= s) {
+          document.getElementById("errEnd").classList.add("show");
+          document.getElementById("endDate").classList.add("invalid");
+          valid = false;
+        }
+        if (!valid) return;
+
+        // Reset selection
+        selectedIds.clear();
+        allMaterials = [];
+
+        document.getElementById("step2Card").style.display = "block";
+        document.getElementById("step3Card").style.display = "none";
+        document.getElementById("availSection").innerHTML =
+          `<div class="avail-loading"><div class="avail-spinner"></div><p>Vérification de la disponibilité…</p></div>`;
+
+        try {
+          const r = await fetch(
+            `${API}/reservations/available?start=${s}&end=${e}`,
+            { headers: H() },
+          );
+
+          if (r.status === 403) {
+            document.getElementById("alertBlocked").classList.add("show");
+            document.getElementById("step2Card").style.display = "none";
+            return;
+          }
+
+          const d = await r.json();
+          allMaterials = d.data || [];
+
+          renderAvailability(allMaterials);
+          document.getElementById("step2Num").className = "step-num done";
+          document.getElementById("step3Card").style.display = "block";
+        } catch (err) {
+          document.getElementById("availSection").innerHTML =
+            `<div class="avail-empty">Erreur lors de la vérification. Réessayez.</div>`;
+        }
+      }
+
+      // ── Render selectable material cards ────────────────────────────
+      function renderAvailability(materials) {
+        const section = document.getElementById("availSection");
+
+        if (!materials.length) {
+          section.innerHTML = `<div class="avail-empty">😔 Aucun matériel disponible sur cette période. Essayez des dates différentes.</div>`;
+          updateSelectionUI();
+          return;
+        }
+
+        section.innerHTML = `
+      <div class="avail-grid" id="availGrid"></div>
+      <div class="sel-bar">
+        <span class="sel-pill" id="selPill">0 sélectionné(s)</span>
+        <div class="sel-actions">
+          <button class="btn-sel" onclick="selectAll()">Tout sélectionner</button>
+          <button class="btn-sel" onclick="clearAll()">Désélectionner tout</button>
+        </div>
+      </div>`;
+
+        renderCards();
+      }
+
+      function renderCards() {
+        const grid = document.getElementById("availGrid");
+        if (!grid) return;
+
+        grid.innerHTML = allMaterials
+          .map(
+            (m) => `
+      <div class="avail-card${selectedIds.has(m.id) ? " selected" : ""}"
+           onclick="toggleMaterial('${m.id}')"
+           role="checkbox"
+           aria-checked="${selectedIds.has(m.id)}"
+           tabindex="0"
+           onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleMaterial('${m.id}')}">
+        <div class="avail-icon">📦</div>
+        <div style="flex:1;min-width:0">
+          <div class="avail-name">${esc(m.name)}</div>
+          <div class="avail-cat">${esc(m.category?.name || "—")}</div>
+        </div>
+        <div class="avail-check">${selectedIds.has(m.id) ? "✓" : ""}</div>
+      </div>
+    `,
+          )
+          .join("");
+
+        updateSelectionUI();
+      }
+
+      function toggleMaterial(id) {
+        if (selectedIds.has(id)) {
+          selectedIds.delete(id);
+        } else {
+          selectedIds.add(id);
+        }
+        renderCards();
+      }
+
+      function selectAll() {
+        allMaterials.forEach((m) => selectedIds.add(m.id));
+        renderCards();
+      }
+
+      function clearAll() {
+        selectedIds.clear();
+        renderCards();
+      }
+
+      function updateSelectionUI() {
+        const count = selectedIds.size;
+        const pill = document.getElementById("selPill");
+        const btnSub = document.getElementById("btnSubmit");
+        const step2Sub = document.getElementById("step2Sub");
+
+        if (pill) {
+          pill.textContent = `${count} matériel${count > 1 ? "s" : ""} sélectionné${count > 1 ? "s" : ""}`;
+          pill.className = count > 0 ? "sel-pill has-sel" : "sel-pill";
+        }
+
+        if (btnSub) {
+          btnSub.disabled = count === 0;
+        }
+
+        if (step2Sub) {
+          step2Sub.textContent =
+            count > 0
+              ? `${count} matériel${count > 1 ? "s" : ""} sélectionné${count > 1 ? "s" : ""} — inclus dans votre demande.`
+              : "Cliquez pour sélectionner un ou plusieurs matériels.";
+        }
+      }
+      // ─────────────────────────────────────────────────────────────────
+
+      function esc(s) {
+        return String(s || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      function openConfirm() {
+        const s = document.getElementById("startDate").value;
+        const e = document.getElementById("endDate").value;
+
+        document.getElementById("sumStart").textContent = fmt(s);
+        document.getElementById("sumEnd").textContent = fmt(e);
+        document.getElementById("sumDuration").textContent =
+          `${diffDays(s, e)} jour(s)`;
+
+        // Build selected materials list for modal
+        const list = document.getElementById("sumMatList");
+        const selected = allMaterials.filter((m) => selectedIds.has(m.id));
+        list.innerHTML = selected
+          .map(
+            (m) => `
+      <li class="modal-mat-item">
+        <span class="dot"></span>
+        <span>${esc(m.name)}</span>
+        <span style="color:var(--muted);font-size:12px;margin-left:4px">(${esc(m.category?.name || "—")})</span>
+      </li>`,
+          )
+          .join("");
+
+        document.getElementById("confirmOverlay").classList.add("show");
+      }
+
+      function closeConfirm() {
+        document.getElementById("confirmOverlay").classList.remove("show");
+      }
+
+      async function finalSubmit() {
+        const btn = document.getElementById("btnFinalSubmit");
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-sm white"></span> Envoi…';
+
+        try {
+          const startDate = document.getElementById("startDate").value;
+          const endDate = document.getElementById("endDate").value;
+
+          // Fire one POST per selected material, all in parallel
+          const requests = [...selectedIds].map((materialId) =>
+            fetch(`${API}/reservations/new`, {
+              method: "POST",
+              headers: H(),
+              body: JSON.stringify({
+                start_date: startDate,
+                end_date: endDate,
+                material_id: materialId,
+              }),
+            }),
+          );
+
+          const responses = await Promise.all(requests);
+
+          // Check for blocked (403 on any response)
+          const blocked = responses.find((r) => r.status === 403);
+          if (blocked) {
+            document.getElementById("alertBlocked").classList.add("show");
+            closeConfirm();
+            return;
+          }
+
+          // Parse all response bodies
+          const bodies = await Promise.all(responses.map((r) => r.json()));
+
+          // Check for any failure
+          const failed = responses.findIndex((r) => !r.ok);
+          if (failed !== -1) {
+            showToast(
+              bodies[failed].message || "Erreur lors d'une des demandes.",
+              "error",
+            );
+            return;
+          }
+
+          closeConfirm();
+          showToast(
+            `${selectedIds.size} demande${selectedIds.size > 1 ? "s soumises" : " soumise"} avec succès ! Vous serez notifié(e) par email et SMS.`,
+          );
+          setTimeout(() => (location.href = "my-reservations.html"), 2000);
+        } catch (err) {
+          showToast("Erreur réseau.", "error");
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = '<span class="btn-text">Confirmer l\'envoi</span>';
+        }
+      }
+      function reset() {
+        document.getElementById("startDate").value = "";
+        document.getElementById("endDate").value = "";
+        document.getElementById("step2Card").style.display = "none";
+        document.getElementById("step3Card").style.display = "none";
+        document.getElementById("durationBadge").style.display = "none";
+        document.getElementById("btnCheck").disabled = true;
+        document.getElementById("step2Num").className = "step-num";
+        selectedIds.clear();
+        allMaterials = [];
+      }
+
+      function logout() {
+        fetch(`${API}/auth/logout`, { method: "POST", headers: H() }).finally(
+          () => {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            location.href = "../../../index.html";
+          },
+        );
+      }
+
+      document
+        .getElementById("confirmOverlay")
+        .addEventListener("click", (e) => {
+          if (e.target === e.currentTarget) closeConfirm();
+        });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeConfirm();
+      });
+
+      // Check if blocked on load
+      if (user.is_blocked)
+        document.getElementById("alertBlocked").classList.add("show");
+    </script>
+  </body>
 </html>
