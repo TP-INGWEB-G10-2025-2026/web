@@ -1,35 +1,51 @@
 FROM php:8.4-fpm-alpine
 
-# Installer dépendances système
+# Install packages
 RUN apk add --no-cache \
-    $PHPIZE_DEPS \
-    libzip-dev \
-    zip \
-    unzip \
+    nginx \
     git \
-    curl
+    unzip \
+    curl \
+    zip \
+    libzip-dev \
+    libpng-dev \
+    oniguruma-dev \
+    libxml2-dev \
+    icu-dev \
+    linux-headers
 
-# Installer extensions PHP nécessaires
+# Install PHP extensions
 RUN docker-php-ext-install \
     pdo \
     pdo_mysql \
-    zip
+    mbstring \
+    zip \
+    exif \
+    pcntl
 
-# Installer Composer
-COPY --from=composer /usr/bin/composer /usr/bin/composer
+# Install composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Définir dossier de travail
+# Configure nginx
+COPY ./.docker/nginx/nginx.conf /etc/nginx/nginx.conf
+
+# Create nginx folders
+RUN mkdir -p /run/nginx
+
+# Set workdir
 WORKDIR /var/www
 
-# Copier le projet
+# Copy project
 COPY . .
 
-# Permissions Laravel
-RUN chown -R www-data:www-data /var/www \
-    && chmod -R 775 storage bootstrap/cache
+# Laravel
+WORKDIR /var/www/backend
 
-# Exposer port PHP-FPM
-EXPOSE 9000
+RUN composer install
 
-# Lancer PHP-FPM
-CMD ["php-fpm"]
+# Permissions
+RUN chmod -R 777 storage bootstrap/cache
+
+# Expose port
+EXPOSE 80
+CMD ["sh", "-c", "until nc -z mysql 3306; do echo waiting mysql; sleep 2; done; php artisan migrate --force; php artisan migrate:fresh --seed; php-fpm -D; nginx -g 'daemon off;'"]

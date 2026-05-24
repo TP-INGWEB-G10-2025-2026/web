@@ -1,0 +1,26 @@
+\babel@toc {french}{}\relax 
+\contentsline {chapter}{\numberline {1}Introduction g\'en\'erale}{2}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Contexte du projet}{2}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Probl\`eme identifi\'e}{2}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Importance et justification du projet}{3}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Objectif g\'en\'eral du projet}{3}{section.1.4}%
+\contentsline {chapter}{\numberline {2}Pr\'esentation g\'en\'erale du projet}{4}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Nom et domaine du projet}{4}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Public cible}{4}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Fonctionnement global de l'application}{4}{section.2.3}%
+\contentsline {chapter}{\numberline {3}Objectifs du projet}{6}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Objectif principal}{6}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Objectifs sp\'ecifiques}{6}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Besoins auxquels r\'epond le projet}{6}{section.3.3}%
+\contentsline {chapter}{\numberline {4}Fonctionnalit\'es de l'application}{7}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Gestion des utilisateurs et authentification}{7}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Gestion du catalogue de mat\'eriels et des cat\'egories}{8}{section.4.2}%
+\contentsline {section}{\numberline {4.3}R\'eservation de mat\'eriel par les enseignants}{9}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Validation et gestion des r\'eservations par l'administrateur}{10}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Suivi des pr\^ets et enregistrement des retours}{11}{section.4.5}%
+\contentsline {section}{\numberline {4.6}Statistiques et tableaux de bord}{12}{section.4.6}%
+\contentsline {chapter}{\numberline {5}Technologies et outils utilis\'es}{14}{chapter.5}%
+\contentsline {chapter}{\numberline {6}Perspectives et am\'eliorations futures}{15}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Am\'eliorations fonctionnelles}{15}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Am\'eliorations techniques}{15}{section.6.2}%
+\contentsline {chapter}{\numberline {7}Conclusion}{16}{chapter.7}%
